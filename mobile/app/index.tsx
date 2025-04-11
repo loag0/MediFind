@@ -1,92 +1,121 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
+import { Link, useNavigation } from '@react-navigation/native';
+//import bgImg from './assets/images/landing-page_background.jpg';
+//import { Link } from 'expo-router';
 
-const LoginScreen = () => {
+export default function Index() {
+  const navigation = useNavigation();
+
   return (
+
     <View style={styles.container}>
-      {/* Black stethoscope image */}
-      <Image
-        source={require('../assets/images/landing-page_background.jpg')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
+    
+    <Image
+        source={require('../assets/images/logo_whiteText.png')}
+        style={styles.logo}
+        resizeMode='contain'
       />
+
+      <Text style={styles.welcometext}> Find the help you need</Text>
       
-      {/* Login options */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Register</Text>
+      <View style={styles.bottomBox}>
+
+        <TouchableOpacity style={styles.button} 
+          /*onPress={() => navigation.navigate('Login')}*/>
+          <Text style={styles.buttonText}>Register</Text>    
         </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
+
+        <TouchableOpacity style={styles.button} 
+          onPress={() => navigation.navigate('login')}>
+          <Text style={styles.buttonText}>Login</Text>    
         </TouchableOpacity>
-        
-        <View style={styles.orContainer}>
+
+        <View style={styles.dividerContainer}>
           <View style={styles.line} />
-          <Text style={styles.orText}>OR</Text>
+          <Text style={styles.text}>OR</Text>
           <View style={styles.line} />
         </View>
-        
+
         <TouchableOpacity>
-          <Text style={styles.guestText}>Continue as Guest</Text>
+          <Text style={styles.guestText}>Continue as Guest </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-};
+  
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
     backgroundColor: '#000',
   },
-  backgroundImage: {
-    width: '100%',
-    height: '70%',
-    position: 'absolute',
-    top: 0,
+  logo: {
+    width: '75%',
+    height: 100, 
+    flexShrink: 1,
+    marginTop: 300
   },
-  buttonContainer: {
-    width: '100%',
+  welcometext: {
+    color: '#fff',
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  bottomBox: {
     position: 'absolute',
-    bottom: 40,
-    paddingHorizontal: 20,
+    bottom: 0,
+    width: '100%',
+    padding: 20,
+    backgroundColor: '#1c1c1c',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 10,
+  },
+  text: {
+    color: '#fff',
+    fontSize: 20,
+    margin: 10,
   },
   button: {
-    backgroundColor: '#E8E8E8',
-    borderRadius: 25,
-    paddingVertical: 14,
-    marginBottom: 15,
+    width: '80%',
+    padding: 15,
+    margin: 10,
+    backgroundColor: '#fff',
+    borderRadius: 100,
     alignItems: 'center',
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: 20,
   },
-  orContainer: {
+  dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 10,
+    width: '80%',
   },
   line: {
     flex: 1,
-    height: 1,
-    backgroundColor: '#666',
+    height: 0.5,
+    backgroundColor: '#fff',
+    margin: 10,
   },
   orText: {
-    color: '#FFF',
-    paddingHorizontal: 15,
-    fontSize: 14,
+    marginHorizontal: 10,
+    color: '#777',
+    fontWeight: 500,
   },
   guestText: {
-    color: '#FFF',
-    textAlign: 'center',
-    marginTop: 10,
+    color: '#fff',
     fontSize: 16,
     textDecorationLine: 'underline',
-  },
+    marginBottom: 10,
+  }
 });
 
-export default LoginScreen;
