@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import { Link, useNavigation } from '@react-navigation/native';
 //import bgImg from './assets/images/landing-page_background.jpg';
-//import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   return (
 
@@ -22,12 +22,12 @@ export default function Index() {
       <View style={styles.bottomBox}>
 
         <TouchableOpacity style={styles.button} 
-          /*onPress={() => navigation.navigate('Login')}*/>
+          onPress={() => router.push('./register')}>
           <Text style={styles.buttonText}>Register</Text>    
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} 
-          onPress={() => navigation.navigate('login')}>
+          onPress={() => router.push('./login')}>
           <Text style={styles.buttonText}>Login</Text>    
         </TouchableOpacity>
 
@@ -37,7 +37,7 @@ export default function Index() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('./guestHome')}>
           <Text style={styles.guestText}>Continue as Guest </Text>
         </TouchableOpacity>
       </View>
