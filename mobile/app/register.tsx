@@ -15,8 +15,6 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import * as Facebook from 'expo-facebook';
 import { router } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons'; // for Facebook
-import { AntDesign } from '@expo/vector-icons';    // for Google
 
 
 WebBrowser.maybeCompleteAuthSession();

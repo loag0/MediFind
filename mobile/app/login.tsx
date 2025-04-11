@@ -32,7 +32,7 @@ const Login = () => {
         const { id_token } = googleResponse.params;
         const credential = GoogleAuthProvider.credential(id_token);
         await signInWithCredential(auth, credential);
-        router.push('/login');
+        router.push('/home');
       }
     };
     authenticateGoogle();
@@ -41,7 +41,7 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push('/login');
+      router.push('/home');
     } catch (error) {
       alert((error as any)?.message ?? 'Something went wrong 😵');
     }
@@ -65,7 +65,7 @@ const Login = () => {
       if (result.type === 'success') {
         const credential = FacebookAuthProvider.credential(result.token);
         await signInWithCredential(auth, credential);
-        router.push('/login');
+        router.push('/home');
       } else {
         console.log('Facebook login cancelled');
       }
@@ -108,7 +108,7 @@ const Login = () => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/register')}>
-          <Text style={styles.link}>New here? Create account here</Text>
+          <Text style={styles.link}>New here? Create an account</Text>
         </TouchableOpacity>
     </View>
   );
