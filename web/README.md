@@ -22,11 +22,6 @@ This is the web-based admin dashboard for MediFind. Admins can log in, add/edit 
 
 - npm start //If using CRA
 
-## ✅ Features
-* Secure Firebase auth
-* CRUD operations for doctor records
-* Firestore data sync with mobile app
-
 ## 🔐 Firebase
 
 Create `src/firebase/config.js` with your Firebase config:

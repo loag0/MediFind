@@ -32,8 +32,6 @@
 
 Real-time data syncing is handled via Firebase so the mobile and web apps stay connected.
 
----
-
 ## 🔧 Tech Stack
 
 | Platform      | Tools Used                                  |
@@ -41,8 +39,6 @@ Real-time data syncing is handled via Firebase so the mobile and web apps stay c
 | Mobile App    | React Native (Expo), Firebase, Expo Router |
 | Web Dashboard | React (Vite), Firebase, Tailwind CSS, React Router |
 | Backend       | Firebase Auth, Firestore DB                 |
-
----
 
 ## 📁 Project Structure
 /MediFind ├── /mobile → Expo mobile app ├── /web → React web admin dashboard
@@ -52,15 +48,11 @@ Real-time data syncing is handled via Firebase so the mobile and web apps stay c
 - See `/mobile/README.md` for mobile app setup
 - See `/web/README.md` for admin web dashboard setup
 
----
-
 ## 🚀 Setup
 
 ### 🧪 Prerequisites
 - Node.js installed
 - Firebase project created
-
----
 
 ### 📱 Mobile App Setup (Expo)
 ```bash
