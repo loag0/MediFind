@@ -9,7 +9,7 @@ MediFind is a cross-platform medical appointment and doctor discovery platform. 
 
 ## 📂 Project Structure
 
-/MediFind ├── /mobile → Mobile app (Expo + Firebase) ├── /web → Web admin dashboard (React + Firebase)
+/MediFind --> /mobile → Mobile app (Expo + Firebase) --> /web → Web admin dashboard (React + Firebase)
 
 ## 🚀 Setup
 

@@ -12,11 +12,11 @@ This is the React Native mobile app built using **Expo**. It allows users to sea
 ## 🔧 Setup
 
 1. Install dependencies:
-cd mobile
-npm install
+- cd mobile
+- npm install
 
 2. Run the app: 
-npm run start
+- npm run start
 
 3. Open in:
 - Android: press `a`
@@ -38,4 +38,5 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+```
 ### All routing is handled via *app/_layout.tsx* using Expo Router 

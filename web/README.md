@@ -12,15 +12,15 @@ This is the web-based admin dashboard for MediFind. Admins can log in, add/edit 
 ## 🔧 Setup
 
 1. Install dependencies:
-cd web
-npm install
+- cd web
+- npm install
 
 2. Run the dev server:
-npm run dev //If using Vite
+- npm run dev //If using Vite
 
-OR
+### OR
 
-npm start //If using CRA
+- npm start //If using CRA
 
 ## ✅ Features
 * Secure Firebase auth
