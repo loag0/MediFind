@@ -98,8 +98,3 @@ npm run dev   # or npm start if using CRA
 - Add / edit doctors
 - View dashboard stats
 - Generate reports
-
-
-## 🚀 Setup
-
-

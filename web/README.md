@@ -41,4 +41,9 @@ const firebaseConfig = { /* your config */ };
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
+```
+## 👨‍⚕️ Features
+- Login (Username + Password)
+- Add / edit doctors
+- View dashboard stats
+- Generate reports

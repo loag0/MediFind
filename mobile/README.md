@@ -41,3 +41,10 @@ export const db = getFirestore(app);
 ```
 ---
 ### All routing is handled via `app/_layout.tsx` using Expo Router 
+
+## 👨‍⚕️ Features
+- Register / login (Email, Google, Facebook)
+- View and search doctor profiles
+- Book appointments
+- View + edit profile
+- Guest mode support
