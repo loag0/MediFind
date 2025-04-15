@@ -43,7 +43,7 @@ Real-time data syncing is handled via Firebase so the mobile and web apps stay c
 ## 📁 Project Structure
 /MediFind ├── /mobile → Expo mobile app ├── /web → React web admin dashboard
 
-## Each folder contains its own README with install + dev instructions.
+### Each folder contains its own README with install + dev instructions.
 
 - See `/mobile/README.md` for mobile app setup
 - See `/web/README.md` for admin web dashboard setup
@@ -90,3 +90,6 @@ npm run dev   # or npm start if using CRA
 - Add / edit doctors
 - View dashboard stats
 - Generate reports
+
+## 🧠 Author Notes
+This project was built with scalability in mind. It supports real-time data sync across platforms and follows clean UI/UX design inspired by modern healthcare systems.
