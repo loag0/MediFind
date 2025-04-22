@@ -1,0 +1,38 @@
+.admin-account-page {
+    text-align: center;
+  }
+  
+.account-box {
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+  
+.account-box input {
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+  
+.account-box button {
+    padding: 10px 20px;
+    font-weight: bold;
+    border: none;
+    background: #000;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 20px;
+    width: 40%;
+}
+.logout-btn {
+    margin-top: 1rem;
+    background-color: #e53935;
+    color: white;
+}
+  

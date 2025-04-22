@@ -1,0 +1,97 @@
+.login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 100px;
+}
+.logo{
+    margin-top: -10%;
+    margin-bottom: -5%;
+    width: 300px;
+}
+.login-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+.login-form input{
+    margin-bottom: 10px;
+    padding: 10px 10px 10px 40px;
+    width: 250px;
+    border-radius: 50px;
+    border-style: solid;
+    border-color: black;
+}
+.login-form .input-icon{
+    position: absolute;
+    top: 40%;
+    left: 12px;
+    transform: translateY(-50%);
+}
+.input-wrapper{
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+
+}
+.forgot-text{
+    font-size: 13px;
+    margin-left: 200px;
+    margin-top: -1%;
+}
+
+.forgot-text:hover{
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+}
+  
+.login-btn {
+    background-color: black;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    align-items: center;
+    position: relative;
+    margin-top: 50px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: inline-flex;
+}
+
+.arrow-icon{
+    opacity: 0;
+    display: none;
+}
+
+.login-btn:hover .arrow-icon{
+    display: unset;
+    opacity: 1;
+    transform: translateX(5px);
+    padding: 0px 5px 0px 5px;
+}
+
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #333;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+  
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+  
+  

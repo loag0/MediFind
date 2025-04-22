@@ -1,0 +1,182 @@
+.dashboard-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    font-family: var(--font-main);
+}
+
+.dashboard-header{
+    display: flex;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-top: 2%;
+}
+
+.dashboard-stats{
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    padding: 10px;
+}
+
+.details{
+    display: flex;
+    max-width: 100%;
+    justify-content: space-between;
+    padding: 0px 20px 0px 20px;
+    gap: 400px;
+    margin-bottom: -2%;
+}
+
+.add-doctor-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.add-doctor-btn:hover{
+    background-color: rgb(0, 0, 121);
+}
+  
+.doctor-list {
+    margin: 20px;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+  
+.doctor-card {
+    border: 1px solid #ccc;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.doctor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+.doctor-card {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    transition: all 0.3s ease;
+}
+  
+.suspended .doctor-card-content {
+    filter: grayscale(1) brightness(0.85);
+    pointer-events: none;
+}
+  
+.suspended-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(120, 120, 120, 0.5);
+    color: red;
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+}
+  
+.suspended .doctor-actions {
+    pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 1rem;
+}
+  
+.doctor-card-content {
+    display: flex;
+    gap: 15px;
+}
+
+.doctor-profile-pic {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.doctor-profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #eee;
+}
+
+.doctor-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+  
+.doctor-card h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+  
+.doctor-card p {
+    margin: 4px 0;
+    color: #666;
+}
+
+.doctor-location {
+    font-size: 0.9rem;
+}
+
+.doctor-profession {
+    font-weight: 500;
+}
+
+.doctor-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    justify-content: flex-end;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    font-family: inherit;
+}
+
+.edit-btn {
+    background-color: #e6f7ff;
+    color: blue;
+}
+
+.report-btn {
+    background-color: #f6ffed;
+    color: #52c41a;
+}
+
+.empty-state{
+    padding: 20px;
+}
