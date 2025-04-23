@@ -102,6 +102,7 @@ To keep things consistent across mobile and web, here are the fields every docto
   }
 }
 ```
+---
 
 ## 🖨️ Print-Friendly Reports
 Each doctor has a printable report page. When you click "Generate Report", you’ll be taken to a report view.
