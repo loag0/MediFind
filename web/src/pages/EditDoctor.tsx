@@ -106,7 +106,6 @@ export default function EditDoctor() {
   
         const data = await res.json();
   
-        // 🛑 LOG AND CHECK THE UPLOAD RESPONSE
         if (!data.secure_url) {
           console.error("Cloudinary upload error:", data);
           throw new Error("Image upload failed");
