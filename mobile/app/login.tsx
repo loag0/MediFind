@@ -19,6 +19,7 @@ const Login = () => {
 
   const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
     clientId: '316330482055-j0ifukfcqsh71092kjomiccate763ih9.apps.googleusercontent.com', 
+    redirectUri: 'https://auth.expo.io/@username0/mobile',
   });
 
   useEffect(() => {
