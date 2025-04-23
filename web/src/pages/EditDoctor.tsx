@@ -1,11 +1,12 @@
 import "../styles/add_doctor.css";
 import { useEffect, useState, useRef } from 'react';
 import { db } from '../firebase/config';
-import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, GeoPoint } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../components/Navbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faStop } from '@fortawesome/free-solid-svg-icons';
+import LocationPicker from "../components/LocationPicker";
 
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/Medi-Find/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'MediFind';
@@ -23,7 +24,7 @@ export default function EditDoctor() {
     gender: '',
     phone: '',
     fax: '',
-    location: '',
+    location: new GeoPoint(0, 0), // Default to (0, 0) if not set
     bio: '',
     rating: 0,
     profileImageUrl: '',
@@ -34,6 +35,7 @@ export default function EditDoctor() {
     isSuspended: false,
   });
 
+  const [locationCoords, setLocationCoords] = useState<L.LatLngLiteral | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -42,7 +44,7 @@ export default function EditDoctor() {
       try {
         const docRef = doc(db, 'doctors', id as string);
         const snap = await getDoc(docRef);
-
+  
         if (snap.exists()) {
           const data = snap.data();
           setForm(prev => ({
@@ -50,6 +52,11 @@ export default function EditDoctor() {
             ...data,
           }));
           setPreviewUrl(data.profileImageUrl || '');
+          
+          // Initialize location coordinates from Firestore data
+          if (data.location && typeof data.location === 'object' && data.location._lat && data.location._long) {
+            setLocationCoords({ lat: data.location._lat, lng: data.location._long });
+          }
         } else {
           alert("Doctor not found.");
           navigate('/dashboard');
@@ -62,7 +69,7 @@ export default function EditDoctor() {
         setLoading(false);
       }
     };
-
+  
     if (id) fetchDoctor();
   }, [id, navigate]);
 
@@ -114,11 +121,20 @@ export default function EditDoctor() {
         imageUrl = data.secure_url;
       }
   
-      await updateDoc(doc(db, 'doctors', id as string), {
+      // Create a GeoPoint if locationCoords exists
+      let location = form.location; // Keep existing value as fallback
+      if (locationCoords && locationCoords.lat && locationCoords.lng) {
+        location = new GeoPoint(locationCoords.lat, locationCoords.lng);
+      }
+  
+      const doctorData = {
         ...form,
         profileImageUrl: imageUrl,
         rating: Number(form.rating),
-      });
+        location: location
+      };
+  
+      await updateDoc(doc(db, 'doctors', id as string), doctorData);
   
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -215,7 +231,12 @@ export default function EditDoctor() {
           </select>
           <input type="text" name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
           <input type="text" name="fax" placeholder="Fax" value={form.fax} onChange={handleChange} />
-          <input type="text" name="location" placeholder="Location" value={form.location} onChange={handleChange} />
+          <div className="map-container">
+            <label>Location</label>
+              <div className="mapContainer">
+                <LocationPicker value={locationCoords} onChange={setLocationCoords} />
+              </div>
+          </div>
           <textarea name="bio" placeholder="Short Bio" value={form.bio} onChange={handleChange} rows={4} />
 
           <button type="submit">Update Doctor</button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { auth } from '../firebase/firebase';
 import {
   signInWithEmailAndPassword,
@@ -9,11 +9,13 @@ import {
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
+import LoadingScreen from './components/LoadingScreen';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const Login = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -35,18 +37,25 @@ const Login = () => {
   }, [googleResponse]);
 
   const handleLogin = async () => {
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/home');
     } catch (error) {
       alert((error as any)?.message ?? 'Something went wrong 😵');
     }
+    setTimeout(() => {
+      router.replace('/home');
+      setLoading(false);
+    }, 1000);
   };
 
   const handleGoogleLogin = async () => {
     await googlePromptAsync();
   };
 
+  if (loading) return <LoadingScreen message='Logging in...'/>; 
+  
   return (
     <View style={styles.container}>
         <Text style={styles.title}>Log In</Text>

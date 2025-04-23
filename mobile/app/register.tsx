@@ -7,11 +7,15 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import LoadingScreen from './components/LoadingScreen';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const Register = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -26,6 +30,8 @@ const Register = () => {
 
       await setDoc(doc(db, 'users', res.user.uid), {
         email,
+        firstName,
+        lastName,
         role: 'user',
         createdAt: new Date()
       });
@@ -75,6 +81,7 @@ const Register = () => {
     signInWithGoogle();
   }, [response]);
   
+  if(loading) return <LoadingScreen message='Signing you up...' />;
 
   return (
     <View style={styles.container}>
@@ -91,6 +98,21 @@ const Register = () => {
           <Text style={styles.orText}>OR</Text>
           <View style={styles.flexLine} />
         </View>
+
+        <TextInput
+          style={styles.input}
+          placeholder="First Name"
+          placeholderTextColor="#ccc"
+          value={firstName}
+          onChangeText={setFirstName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Last Name"
+          placeholderTextColor="#ccc"
+          value={lastName}
+          onChangeText={setLastName}
+        />
 
         <TextInput
           style={styles.input}

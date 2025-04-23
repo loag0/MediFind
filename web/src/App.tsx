@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import 'leaflet/dist/leaflet.css';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AddDoctor from './pages/AddDoctor';

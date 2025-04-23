@@ -93,6 +93,9 @@
   border-radius: 6px;
   font-size: 1rem;
 }
+.mapContainer{
+  padding: 20px 20px 0 20px;
+}
   
 .add-doctor-form button {
   display: flex;

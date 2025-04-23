@@ -4,6 +4,7 @@ import { db } from '../firebase/config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/Navbar';
+import LocationPicker from "../components/LocationPicker";
 
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/Medi-Find/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'MediFind';
@@ -19,7 +20,7 @@ export default function AddDoctor() {
     gender: '',
     phone: '',
     fax: '',
-    location: '',
+    location: null as L.LatLngLiteral | null,
     bio: '',
     rating: 0,  
     profileImageUrl: '',
@@ -28,7 +29,7 @@ export default function AddDoctor() {
       end: '',
     },
   });
-
+  const [locationCoords, setLocationCoords] = useState<L.LatLngLiteral | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -76,6 +77,8 @@ export default function AddDoctor() {
         createdAt: serverTimestamp(),
         profileImageUrl: imageUrl,
         rating: Number(form.rating),
+        lat: locationCoords?.lat,
+        lng: locationCoords?.lng,
       });
 
       navigate('/dashboard');
@@ -137,8 +140,14 @@ export default function AddDoctor() {
 
           <input type="text" name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
           <input type="text" name="fax" placeholder="Fax" value={form.fax} onChange={handleChange} />
-          <input type="text" name="location" placeholder="Location" value={form.location} onChange={handleChange} />
-          
+          <div className="map-container">
+          <label>Location</label>
+            <div className="mapContainer">
+            <LocationPicker value={locationCoords} onChange={setLocationCoords} />
+            </div>
+
+          </div>
+
           <label>Start Time</label>
           <input
             type="time"
