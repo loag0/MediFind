@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { auth } from '../firebase/firebase';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  FacebookAuthProvider,
   signInWithCredential,
 } from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
-import * as Facebook from 'expo-facebook';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 
@@ -22,7 +18,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
 
   const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-    clientId: 'YOUR_GOOGLE_WEB_CLIENT_ID', // WEB client ID only
+    clientId: '316330482055-j0ifukfcqsh71092kjomiccate763ih9.apps.googleusercontent.com', 
   });
 
   useEffect(() => {
@@ -50,41 +46,12 @@ const Login = () => {
     await googlePromptAsync();
   };
 
-  const handleFacebookLogin = async () => {
-    try {
-
-      await Facebook.initializeAsync({
-        appId: '3826415817623596',
-      });
-
-      const result = await Facebook.logInWithReadPermissionsAsync({
-        permissions: ['public_profile', 'email'],
-      });
-      
-      if (result.type === 'success') {
-        const credential = FacebookAuthProvider.credential(result.token);
-        await signInWithCredential(auth, credential);
-        router.push('/home');
-      } else {
-        console.log('Facebook login cancelled');
-      }
-    } catch (e) {
-      console.log('FB login error:', e);
-      alert('Facebook login failed 💀');
-    }
-  };
-
   return (
     <View style={styles.container}>
         <Text style={styles.title}>Log In</Text>
         <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
           
           <Text style={styles.socialText}>Continue with Google</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.socialButton} onPress={handleFacebookLogin}>
-          
-          <Text style={styles.socialText}>Continue with Facebook</Text>
         </TouchableOpacity>
 
         <View style={styles.dividerRow}>

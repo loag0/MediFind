@@ -1,87 +1,89 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ImageBackground,
-  ImageComponent,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { auth } from '../firebase/firebase';
-import {
-  createUserWithEmailAndPassword,
-  signInWithCredential,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-} from 'firebase/auth';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { auth, db } from '../firebase/firebase';
+import { createUserWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import * as Facebook from 'expo-facebook';
-import { router } from 'expo-router';
-
+import { useRouter } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const Register = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [googleRequest, , googlePromptAsync] = Google.useIdTokenAuthRequest({
-    clientId: 'YOUR_GOOGLE_CLIENT_ID',
+  const [_, response, googlePromptAsync] = Google.useIdTokenAuthRequest({
+    clientId: '316330482055-j0ifukfcqsh71092kjomiccate763ih9.apps.googleusercontent.com',
+    redirectUri: 'https://auth.expo.io/@username0/mobile',
   });
-
-  useEffect(() => {
-    (async () => {
-      await Facebook.initializeAsync({ appId: 'YOUR_FACEBOOK_APP_ID' });
-    })();
-  }, []);
 
   const handleRegister = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push('./home');
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
+      const res = await createUserWithEmailAndPassword(auth, email, password);
 
-  const handleGoogleRegister = async () => {
-    const result = await googlePromptAsync();
-    if (result?.type === 'success') {
-      const credential = GoogleAuthProvider.credential(result.params.id_token);
-      await signInWithCredential(auth, credential);
-      router.push('./home');
-    }
-  };
-
-  const handleFacebookRegister = async () => {
-    try {
-      const result = await Facebook.logInWithReadPermissionsAsync({
-        permissions: ['public_profile', 'email'],
+      await setDoc(doc(db, 'users', res.user.uid), {
+        email,
+        role: 'user',
+        createdAt: new Date()
       });
 
-      if (result.type === 'success') {
-        const credential = FacebookAuthProvider.credential(result.token);
-        await signInWithCredential(auth, credential);
-        router.push('./home');
-      } else {
-        console.log('Facebook login cancelled');
-      }
+      router.replace('/home');
     } catch (err) {
-      console.error('Facebook Login Error:', err);
-      alert('Facebook login failed. Try again.');
+      console.error('Registration Error:', err);
+      Alert.alert('Error', 'Failed to register.');
     }
   };
+
+  const handleGoogleSignUp = async () => {
+    const result = await googlePromptAsync();
+    console.log("Google sign-in result:", result);
+
+    if (result?.type === 'success') {
+      const credential = GoogleAuthProvider.credential(result.params.id_token);
+      const userCred = await signInWithCredential(auth, credential);
+
+      await setDoc(doc(db, 'users', userCred.user.uid), {
+        email: userCred.user.email,
+        role: 'user',
+        createdAt: new Date()
+      });
+
+      router.replace('/home');
+    }
+  };
+
+  useEffect(() => {
+    const signInWithGoogle = async () => {
+      if (response?.type === 'success') {
+        const { id_token } = response.params;
+        const credential = GoogleAuthProvider.credential(id_token);
+        const userCred = await signInWithCredential(auth, credential);
+  
+        await setDoc(doc(db, 'users', userCred.user.uid), {
+          email: userCred.user.email,
+          role: 'user',
+          createdAt: new Date()
+        });
+  
+        router.replace('/home');
+      }
+    };
+  
+    signInWithGoogle();
+  }, [response]);
+  
 
   return (
     <View style={styles.container}>
 
         <Text style={styles.title}>Sign Up</Text>
 
-        <TouchableOpacity style={styles.socialButton} onPress={handleGoogleRegister}>
+        <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignUp}>
+          <FontAwesome name="google" size={20} color="white" style={{ marginRight: 10 }} />
           <Text style={styles.socialText}>Sign up with Google</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.socialButton} onPress={handleFacebookRegister}>
-          <Text style={styles.socialText}>Sign up with Facebook</Text>
         </TouchableOpacity>
 
         <View style={styles.dividerRow}>
@@ -131,18 +133,20 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     socialButton: {
+      flexDirection: 'row',
         borderWidth: 1,
         borderColor: '#ccc',
-        paddingVertical: 12,
+        padding: 12,
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
         margin: 15,
-        width: '70%',
+        width: '50%',
         height: 50
     },
     socialText: {
         color: 'white',
+        fontSize: 16,
     },
     dividerRow: {
         flexDirection: 'row',

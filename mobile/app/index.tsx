@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
-import { Link, useNavigation } from '@react-navigation/native';
 //import bgImg from './assets/images/landing-page_background.jpg';
 import { useRouter } from 'expo-router';
 
@@ -22,7 +21,7 @@ export default function Index() {
       <View style={styles.bottomBox}>
 
         <TouchableOpacity style={styles.button} 
-          onPress={() => router.push('./home')}>
+          onPress={() => router.push('./register')}>
           <Text style={styles.buttonText}>Register</Text>    
         </TouchableOpacity>
 
