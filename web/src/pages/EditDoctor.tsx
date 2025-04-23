@@ -5,9 +5,9 @@ import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../components/Navbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faTrash, faStop } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faStop } from '@fortawesome/free-solid-svg-icons';
 
-const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/medi-find/image/upload';
+const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/Medi-Find/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'MediFind';
 
 export default function EditDoctor() {
@@ -27,6 +27,10 @@ export default function EditDoctor() {
     bio: '',
     rating: 0,
     profileImageUrl: '',
+    workingHours: {
+      start: '',
+      end: '',
+    },
     isSuspended: false,
   });
 
@@ -86,29 +90,37 @@ export default function EditDoctor() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
       let imageUrl = previewUrl || '';
+      
       if (imageFile) {
         const formData = new FormData();
         formData.append('file', imageFile);
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
+  
         const res = await fetch(CLOUDINARY_UPLOAD_URL, {
           method: 'POST',
           body: formData
         });
-
+  
         const data = await res.json();
+  
+        // 🛑 LOG AND CHECK THE UPLOAD RESPONSE
+        if (!data.secure_url) {
+          console.error("Cloudinary upload error:", data);
+          throw new Error("Image upload failed");
+        }
+  
         imageUrl = data.secure_url;
       }
-
+  
       await updateDoc(doc(db, 'doctors', id as string), {
         ...form,
         profileImageUrl: imageUrl,
         rating: Number(form.rating),
       });
-
+  
       navigate('/dashboard');
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -119,6 +131,7 @@ export default function EditDoctor() {
       alert('Error updating doctor.');
     }
   };
+  
 
   const handleSuspend = async () => {
     if (!id) return;
@@ -164,15 +177,22 @@ export default function EditDoctor() {
       <div className="add-doctor-page">
         <h1>Edit Doctor</h1>
 
-        <div className="profile-upload-section" onClick={handleImageClick}>
+        <div className="profile-upload-section">
           {!previewUrl ? (
-            <div className="image-placeholder">
+            <div className="image-placeholder" onClick={handleImageClick}>
               <p>Click to add picture</p>
             </div>
           ) : (
             <div className="profile-img-wrapper">
               <img src={previewUrl} alt="Doctor profile" className="profile-img" />
-              <FontAwesomeIcon icon={faPen} className="edit-icon" />
+              <div className="image-controls">
+                <button type="button" className="edit-btn" onClick={handleImageClick}>Change</button>
+                <button type="button" className="delete-btn" onClick={() => {
+                    setImageFile(null);
+                    setPreviewUrl(null);
+                  }}>Remove
+                </button>
+              </div>
             </div>
           )}
           <input

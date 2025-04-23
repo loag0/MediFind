@@ -5,6 +5,7 @@ import AddDoctor from './pages/AddDoctor';
 import UserProfile from './pages/UserProfile';
 import EditDoctor from './pages/EditDoctor';
 import AdminAccount from './pages/AdminAccount';
+import DoctorReport from './pages/DoctorReport';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/user-profile" element={<UserProfile />} />
       <Route path="/edit-doctor/:id" element={<EditDoctor />} />
       <Route path="/admin-account" element={<AdminAccount />} /> 
+      <Route path="/doctor-report/:id" element={<DoctorReport />} />
     </Routes>
   );
 }

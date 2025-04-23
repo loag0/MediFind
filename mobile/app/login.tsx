@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView,
 } from 'react-native';
-import { auth } from '../firebase';
+import { auth } from '../firebase/firebase';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -13,7 +13,6 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as Facebook from 'expo-facebook';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
-//import { FontAwesome, AntDesign } from '@expo/vector-icons';
 
 WebBrowser.maybeCompleteAuthSession();
 

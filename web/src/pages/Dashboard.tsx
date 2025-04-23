@@ -93,10 +93,12 @@ export default function Dashboard() {
                         </Link>
                 
                         {!doc.isSuspended && (
-                          <button 
-                            onClick={() => console.log(`Generate report for ${doc.id}`)} 
+                            <Link 
+                            to={`/doctor-report/${doc.id}`} 
                             className="action-btn report-btn"
-                            ><FontAwesomeIcon icon={faFileAlt} /> Generate Report</button>
+                            >
+                            <FontAwesomeIcon icon={faFileAlt} /> Generate Report
+                            </Link>
                           )}
                       </div>
                     </div>

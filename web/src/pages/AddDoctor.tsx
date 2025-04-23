@@ -5,8 +5,8 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/Navbar';
 
-const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload';
-const CLOUDINARY_UPLOAD_PRESET = 'medifind_unsigned';
+const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/Medi-Find/image/upload';
+const CLOUDINARY_UPLOAD_PRESET = 'MediFind';
 
 export default function AddDoctor() {
   const navigate = useNavigate();
@@ -23,6 +23,10 @@ export default function AddDoctor() {
     bio: '',
     rating: 0,  
     profileImageUrl: '',
+    workingHours: {
+      start: '',
+      end: '',
+    },
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -119,8 +123,7 @@ export default function AddDoctor() {
           />
         </div>
 
-
-        <form onSubmit={handleSubmit} className="add-doctor-form">
+        <form onSubmit={handleSubmit} className={`add-doctor-form ${previewUrl ? 'with-image' : ''}`}>
           <input type="text" name="fullName" placeholder="Full Name" value={form.fullName} onChange={handleChange} required />
           <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
           <input type="text" name="profession" placeholder="Profession" value={form.profession} onChange={handleChange} required />
@@ -135,6 +138,38 @@ export default function AddDoctor() {
           <input type="text" name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
           <input type="text" name="fax" placeholder="Fax" value={form.fax} onChange={handleChange} />
           <input type="text" name="location" placeholder="Location" value={form.location} onChange={handleChange} />
+          
+          <label>Start Time</label>
+          <input
+            type="time"
+            name="workingStart"
+            value={form.workingHours?.start || ''}
+            onChange={(e) =>
+              setForm((prev) => ({
+              ...prev,
+              workingHours: {
+                ...prev.workingHours,
+                start: e.target.value
+                }
+              }))
+            }
+          />
+
+          <label>End Time</label>
+          <input
+            type="time"
+            name="workingEnd"
+            value={form.workingHours?.end || ''}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                workingHours: {
+                ...prev.workingHours,
+                end: e.target.value
+                }
+              }))
+            }
+          />
 
           <textarea name="bio" placeholder="Short Bio" value={form.bio} onChange={handleChange} rows={4} />
 

@@ -30,7 +30,7 @@ const home = () => {
         <Text style={{color: 'white', fontSize: 36, alignSelf: 'flex-start', marginLeft: 25, fontWeight: 'bold'}}>JOHN DOE</Text>
         
         <ScrollView style={styles.professionScroll}>
-            <View className='flex-row flex-wrap'>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {['All', 'Cardiologist'].map((item) => (
                     <TouchableOpacity key={item} style={styles.professionText}>
                         <Text >{item}</Text>

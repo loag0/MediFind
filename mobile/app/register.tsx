@@ -4,7 +4,7 @@ import {
   ImageComponent,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { auth } from '../firebase';
+import { auth } from '../firebase/firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithCredential,

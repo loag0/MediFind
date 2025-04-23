@@ -13,11 +13,9 @@
 }
 
 .profile-upload-section {
-  margin-bottom: 2rem;
   display: flex;
   justify-content: center;
   padding: 10px;
-  margin-bottom: 7rem;
 }
   
 .image-placeholder {
@@ -42,14 +40,12 @@
   flex-direction: column;
   position: relative;
   width: 120px;
-  height: 120px;
+  height: auto;
 }
   
 .profile-img {
   width: 160px;
   height: 160px;
-  display: flex;
-  justify-content: center;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #005bcc;
@@ -83,6 +79,12 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 3rem;
+  transition: margin-top 0.3s ease;
+}
+
+.add-doctor-form.with-image {
+  margin-top: 2rem;
 }
   
 .add-doctor-form input, .add-doctor-form select, .add-doctor-form textarea {

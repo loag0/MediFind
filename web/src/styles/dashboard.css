@@ -74,7 +74,7 @@
 }
   
 .suspended .doctor-card-content {
-    filter: grayscale(1) brightness(0.85);
+    
     pointer-events: none;
 }
   
@@ -92,15 +92,15 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-
 }
   
 .suspended .doctor-actions {
     pointer-events: auto;
     display: flex;
     justify-content: center;
-    gap: 12px;
     margin-top: 1rem;
+    align-items: center;
+    margin-right: 100px;
 }
   
 .doctor-card-content {
