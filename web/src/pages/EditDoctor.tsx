@@ -237,6 +237,39 @@ export default function EditDoctor() {
                 <LocationPicker value={locationCoords} onChange={setLocationCoords} />
               </div>
           </div>
+
+          <label>Start Time</label>
+            <input
+              type="time"
+              name="workingStart"
+              value={form.workingHours?.start || ''}
+              onChange={(e) =>
+                setForm((prev) => ({
+                ...prev,
+                workingHours: {
+                ...prev.workingHours,
+                start: e.target.value
+                }
+                }))
+              }
+              />
+          
+          <label>End Time</label>
+            <input
+              type="time"
+              name="workingEnd"
+              value={form.workingHours?.end || ''}
+              onChange={(e) =>
+                setForm((prev) => ({
+                ...prev,
+                workingHours: {
+                ...prev.workingHours,
+                end: e.target.value
+                }
+                }))
+              }
+          />
+          
           <textarea name="bio" placeholder="Short Bio" value={form.bio} onChange={handleChange} rows={4} />
 
           <button type="submit">Update Doctor</button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Modal, FlatList } from 'react-native';
 import { auth, db } from '../firebase/firebase';
 import { createUserWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -11,6 +11,13 @@ import LoadingScreen from './components/LoadingScreen';
 
 WebBrowser.maybeCompleteAuthSession();
 
+const countryCodes = [
+  { code: '+267', country: 'Botswana' },
+  { code: '+27', country: 'South Africa' },
+  { code: '+263', country: 'Zimbabwe' },
+  { code: '+260', country: 'Zambia' },
+];
+
 const Register = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -18,13 +25,27 @@ const Register = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+1');
+  const [modalVisible, setModalVisible] = useState(false);
 
   const [_, response, googlePromptAsync] = Google.useIdTokenAuthRequest({
     clientId: '316330482055-j0ifukfcqsh71092kjomiccate763ih9.apps.googleusercontent.com',
     redirectUri: 'https://auth.expo.io/@username0/mobile',
   });
 
+  const validatePhone = () => {
+    // Basic validation - can be enhanced based on specific requirements
+    return phone.length >= 7 && /^\d+$/.test(phone);
+  };
+
   const handleRegister = async () => {
+    if (!validatePhone()) {
+      Alert.alert('Invalid Phone', 'Please enter a valid phone number');
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
 
@@ -32,6 +53,7 @@ const Register = () => {
         email,
         firstName,
         lastName,
+        phone: `${countryCode}${phone}`,
         role: 'user',
         createdAt: new Date()
       });
@@ -40,41 +62,70 @@ const Register = () => {
     } catch (err) {
       console.error('Registration Error:', err);
       Alert.alert('Error', 'Failed to register.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSignUp = async () => {
-    const result = await googlePromptAsync();
-    console.log("Google sign-in result:", result);
+    if (!validatePhone()) {
+      Alert.alert('Invalid Phone', 'Please enter a valid phone number before continuing with Google');
+      return;
+    }
 
-    if (result?.type === 'success') {
-      const credential = GoogleAuthProvider.credential(result.params.id_token);
-      const userCred = await signInWithCredential(auth, credential);
+    setLoading(true);
+    try {
+      const result = await googlePromptAsync();
+      console.log("Google sign-in result:", result);
 
-      await setDoc(doc(db, 'users', userCred.user.uid), {
-        email: userCred.user.email,
-        role: 'user',
-        createdAt: new Date()
-      });
+      if (result?.type === 'success') {
+        const credential = GoogleAuthProvider.credential(result.params.id_token);
+        const userCred = await signInWithCredential(auth, credential);
 
-      router.replace('/home');
+        await setDoc(doc(db, 'users', userCred.user.uid), {
+          email: userCred.user.email,
+          firstName: firstName || userCred.user.displayName?.split(' ')[0] || '',
+          lastName: lastName || userCred.user.displayName?.split(' ').slice(1).join(' ') || '',
+          phone: `${countryCode}${phone}`,
+          role: 'user',
+          createdAt: new Date()
+        });
+
+        router.replace('/home');
+      }
+    } catch (error) {
+      console.error('Google Sign-up Error:', error);
+      Alert.alert('Error', 'Failed to sign up with Google.');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     const signInWithGoogle = async () => {
       if (response?.type === 'success') {
-        const { id_token } = response.params;
-        const credential = GoogleAuthProvider.credential(id_token);
-        const userCred = await signInWithCredential(auth, credential);
-  
-        await setDoc(doc(db, 'users', userCred.user.uid), {
-          email: userCred.user.email,
-          role: 'user',
-          createdAt: new Date()
-        });
-  
-        router.replace('/home');
+        setLoading(true);
+        try {
+          const { id_token } = response.params;
+          const credential = GoogleAuthProvider.credential(id_token);
+          const userCred = await signInWithCredential(auth, credential);
+    
+          await setDoc(doc(db, 'users', userCred.user.uid), {
+            email: userCred.user.email,
+            firstName: firstName || userCred.user.displayName?.split(' ')[0] || '',
+            lastName: lastName || userCred.user.displayName?.split(' ').slice(1).join(' ') || '',
+            phone: `${countryCode}${phone}`,
+            role: 'user',
+            createdAt: new Date()
+          });
+    
+          router.replace('/home');
+        } catch (error) {
+          console.error('Google Auth Error:', error);
+          Alert.alert('Error', 'Failed to authenticate with Google.');
+        } finally {
+          setLoading(false);
+        }
       }
     };
   
@@ -83,9 +134,21 @@ const Register = () => {
   
   if(loading) return <LoadingScreen message='Signing you up...' />;
 
-  return (
-    <View style={styles.container}>
+  const renderCountryItem = ({ item }: { item: { code: string; country: string } }) => (
+    <TouchableOpacity 
+      style={styles.countryItem}
+      onPress={() => {
+        setCountryCode(item.code);
+        setModalVisible(false);
+      }}
+    >
+      <Text style={styles.countryItemText}>{item.code} ({item.country})</Text>
+    </TouchableOpacity>
+  );
 
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
         <Text style={styles.title}>Sign Up</Text>
 
         <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignUp}>
@@ -118,9 +181,31 @@ const Register = () => {
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#ccc"
+          keyboardType="email-address"
+          autoCapitalize="none"
           value={email}
           onChangeText={setEmail}
         />
+        
+        <View style={styles.phoneContainer}>
+          <TouchableOpacity 
+            style={styles.countryCodeButton}
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={styles.countryCodeText}>{countryCode}</Text>
+            <FontAwesome name="caret-down" size={16} color="white" style={{ marginLeft: 5 }} />
+          </TouchableOpacity>
+          
+          <TextInput
+            style={styles.phoneInput}
+            placeholder="Phone Number"
+            placeholderTextColor="#ccc"
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+          />
+        </View>
+
         <TextInput
           style={styles.input}
           placeholder="Password"
@@ -138,14 +223,48 @@ const Register = () => {
           <Text style={styles.link}>Already have an account? Login</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Country Code Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Country Code</Text>
+            
+            <FlatList
+              data={countryCodes}
+              renderItem={renderCountryItem}
+              keyExtractor={(item) => item.code}
+              style={styles.countryList}
+            />
+            
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+    scrollContainer: {
+      flexGrow: 1,
+      backgroundColor: '#111111',
+    },
     container: {
         backgroundColor: '#111111',
         alignItems: 'center',
         flex: 1,
+        paddingBottom: 40,
     },
     title: {
         paddingTop: 80,
@@ -156,15 +275,15 @@ const styles = StyleSheet.create({
     },
     socialButton: {
       flexDirection: 'row',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: 15,
-        width: '50%',
-        height: 50
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 15,
+      width: '50%',
+      height: 50
     },
     socialText: {
         color: 'white',
@@ -197,6 +316,36 @@ const styles = StyleSheet.create({
         width: '70%',
         height: 50
     },
+    phoneContainer: {
+        flexDirection: 'row',
+        width: '70%',
+        marginVertical: 12,
+    },
+    countryCodeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        padding: 12,
+        width: '30%',
+        height: 50,
+        marginRight: 8,
+    },
+    countryCodeText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    phoneInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        padding: 12,
+        color: 'white',
+        height: 50,
+    },
     button: {
         backgroundColor: 'white',
         padding: 14,
@@ -216,10 +365,52 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textDecorationLine: 'underline',
     },
-    background: {
+    // Modal styles
+    modalContainer: {
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '80%',
+        maxHeight: '70%',
+        backgroundColor: '#222',
+        borderRadius: 12,
+        padding: 20,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+    },
+    countryList: {
         width: '100%',
-        height: '100%',
+    },
+    countryItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333',
+        width: '100%',
+    },
+    countryItemText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    closeButton: {
+        marginTop: 15,
+        padding: 12,
+        borderRadius: 8,
+        backgroundColor: '#444',
+        width: '100%',
+    },
+    closeButtonText: {
+        color: 'white',
+        textAlign: 'center',
+        fontSize: 16,
     },
 });
 

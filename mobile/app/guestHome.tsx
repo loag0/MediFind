@@ -114,17 +114,16 @@ const styles = StyleSheet.create({
     top: 0,
     height: 100,
     alignItems: 'center',
-    paddingTop: 10,
+    paddingTop: 50,
+    marginBottom: 50,
   },
   logo: {
     width: 200,
     height: 50,
   },
   professionScroll: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
     maxHeight: 50,
-    borderWidth: 1,
-    borderColor: 'white',
   },
   professionText: {
     height: 40,

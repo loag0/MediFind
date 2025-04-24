@@ -3,14 +3,14 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'rea
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { db } from '../firebase/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const Home = () => {
     const router = useRouter();
-    const user = {
-        firstName: '',
-        lastName: '',
-    };
+    const [user, setUser] = useState({ firstName: '', lastName: '' });
+    const auth = getAuth();
+    
     interface Doctor {
         id: string;
         isSuspended: boolean;
@@ -24,6 +24,33 @@ const Home = () => {
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [specialties, setSpecialties] = useState<string[]>([]);
     const [selectedSpec, setSelectedSpec] = useState('All');
+
+    useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+        if (authUser) {
+          try {
+            const userRef = doc(db, "users", authUser.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+              const userData = userSnap.data();
+              setUser({
+                firstName: userData.firstName || '',
+                lastName: userData.lastName || ''
+              });
+            } else {
+              console.log("No user document found!");
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+          }
+        } else {
+          setUser({ firstName: '', lastName: '' });
+        }
+      });
+      
+      return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         const fetchDoctors = async () => {
@@ -67,7 +94,7 @@ const Home = () => {
 
         <Text style={styles.welcomeText}>WELCOME,</Text>
         <Text style={styles.nameText}>
-            {user.firstName?.toUpperCase()} {user.lastName?.toUpperCase()}
+            {user.firstName?.toUpperCase() || "" } {user.lastName?.toUpperCase() || ""}
         </Text>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.professionScroll}>
@@ -110,7 +137,7 @@ const Home = () => {
                         <Text style={styles.btnText}>View</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionBtn}>
+                    <TouchableOpacity onPress={() => router.push({ pathname: '/booking/[id]', params: { id: doc.id } })} style={styles.actionBtn}>
                         <FontAwesome name="calendar" size={16} color="white" />
                         <Text style={styles.btnText}>Book</Text>
                     </TouchableOpacity>
@@ -136,11 +163,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 25,
-    marginBottom: 20,
-    paddingTop: 10,
+    marginBottom: 30,
+    paddingTop: 50,
   },
   logo: {
-    marginLeft: -10,
+    marginLeft: -20,
     width: 200,
     height: 50,
   },
@@ -151,14 +178,14 @@ const styles = StyleSheet.create({
   welcomeText: {
     color: 'white',
     fontSize: 36,
-    marginLeft: 25,
+    marginLeft: 20,
     fontWeight: '400',
   },
   nameText: {
     color: 'white',
-    fontSize: 36,
+    fontSize: 32,
     alignSelf: 'flex-start',
-    marginLeft: 25,
+    marginLeft: 20,
     fontWeight: 'bold',
   },
   professionScroll: {
@@ -183,7 +210,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   card: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#2c2c2c',
     padding: 15,
     borderRadius: 12,
     marginBottom: 20,

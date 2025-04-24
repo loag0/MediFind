@@ -27,6 +27,7 @@ export default function RootLayout() {
         <Stack.Screen name="home" />
         <Stack.Screen name="searchPage" />
         <Stack.Screen name="booking" />
+        <Stack.Screen name="userProfile" />
       </Stack>
     </>
   );
