@@ -26,7 +26,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+1');
+  const [countryCode, setCountryCode] = useState('+267');
   const [modalVisible, setModalVisible] = useState(false);
 
   const [_, response, googlePromptAsync] = Google.useIdTokenAuthRequest({
@@ -35,7 +35,6 @@ const Register = () => {
   });
 
   const validatePhone = () => {
-    // Basic validation - can be enhanced based on specific requirements
     return phone.length >= 7 && /^\d+$/.test(phone);
   };
 
@@ -224,7 +223,6 @@ const Register = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Country Code Modal */}
       <Modal
         animationType="slide"
         transparent={true}

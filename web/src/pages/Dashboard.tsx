@@ -36,7 +36,6 @@ export default function Dashboard() {
         const snap = await getDocs(collection(db, 'doctors'));
         console.log("📦 Fetched Docs:", snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     
-        // Check if we got any documents at all
         if (snap.empty) {
           console.log("No documents found in the 'doctors' collection");
           setDoctors([]);
@@ -47,8 +46,7 @@ export default function Dashboard() {
     
         snap.docs.forEach((docSnap) => {
           const data = docSnap.data();
-          
-          // More robust validation
+
           if (!data || typeof data !== 'object') {
             console.warn(`⚠️ Doc ${docSnap.id} has invalid data structure`);
             return;

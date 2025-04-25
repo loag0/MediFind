@@ -52,8 +52,7 @@ export default function UserProfile() {
 
   const parsePhoneWithCode = (fullPhone: string) => {
     if (!fullPhone) return { code: '+267', number: '' };
-    
-    // Find the country code that matches the beginning of the phone number
+
     const countryCode = countryCodes.find(c => 
       fullPhone.startsWith(c.code)
     )?.code || '+267';

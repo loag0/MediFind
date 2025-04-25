@@ -1,4 +1,3 @@
-// /app/booking/[id].tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';

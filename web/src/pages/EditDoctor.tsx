@@ -24,7 +24,7 @@ export default function EditDoctor() {
     gender: '',
     phone: '',
     fax: '',
-    location: new GeoPoint(0, 0), // Default to (0, 0) if not set
+    location: new GeoPoint(0, 0),
     bio: '',
     rating: 0,
     profileImageUrl: '',
@@ -52,8 +52,7 @@ export default function EditDoctor() {
             ...data,
           }));
           setPreviewUrl(data.profileImageUrl || '');
-          
-          // Initialize location coordinates from Firestore data
+
           if (data.location && typeof data.location === 'object' && data.location._lat && data.location._long) {
             setLocationCoords({ lat: data.location._lat, lng: data.location._long });
           }
@@ -120,9 +119,8 @@ export default function EditDoctor() {
   
         imageUrl = data.secure_url;
       }
-  
-      // Create a GeoPoint if locationCoords exists
-      let location = form.location; // Keep existing value as fallback
+
+      let location = form.location;
       if (locationCoords && locationCoords.lat && locationCoords.lng) {
         location = new GeoPoint(locationCoords.lat, locationCoords.lng);
       }

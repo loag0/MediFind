@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
-//import bgImg from './assets/images/landing-page_background.jpg';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
+import bgImg from '../assets/images/landing-page_background.jpg';
 import { useRouter } from 'expo-router';
 
 export default function Index() {
@@ -8,7 +8,7 @@ export default function Index() {
 
   return (
 
-    <View style={styles.container}>
+    <ImageBackground source={bgImg} style={styles.container} resizeMode='cover'>
     
     <Image
         source={require('../assets/images/logo_whiteText.png')}
@@ -40,7 +40,7 @@ export default function Index() {
           <Text style={styles.guestText}>Continue as Guest </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
   
 }
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#000',
+    justifyContent: 'flex-start',
   },
   logo: {
     width: '75%',

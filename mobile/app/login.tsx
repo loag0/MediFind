@@ -10,6 +10,7 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import LoadingScreen from './components/LoadingScreen';
+import { FontAwesome } from '@expo/vector-icons';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -60,7 +61,7 @@ const Login = () => {
     <View style={styles.container}>
         <Text style={styles.title}>Log In</Text>
         <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
-          
+          <FontAwesome name="google" size={20} color="white" style={{ marginRight: 10 }} />
           <Text style={styles.socialText}>Continue with Google</Text>
         </TouchableOpacity>
 
@@ -107,13 +108,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderWidth: 1,
     borderColor: '#ccc',
-    gap: 10,
-    paddingVertical: 12,
-    borderRadius: 5,
+    padding: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     margin: 15,
-    width: '70%',
+    width: '50%',
     height: 50
   },
   socialText: {

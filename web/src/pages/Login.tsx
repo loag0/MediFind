@@ -24,7 +24,6 @@ function Login() {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
 
-      // Check role in Firestore
       const docRef = doc(db, 'users', uid);
       const snap = await getDoc(docRef);
 

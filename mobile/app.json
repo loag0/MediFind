@@ -16,7 +16,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1c1c1c"
-      }
+      },
+      "package": "com.username0.medifind"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,15 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f440126c-9a97-4eed-8cdc-755c1d7158f0",
+        "buildType": "apk"
+      }
     }
   }
 }

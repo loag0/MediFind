@@ -1,36 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Dimensions } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebase';
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { db } from '../firebase/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-
-interface Doctor {
-  id: string;
-  isSuspended: boolean;
-  profession: string;
-  fullName: string;
-  profileImageUrl?: string;
-  location?: string;
-  phone?: string;
-}
 
 const SearchPage = () => {
   const router = useRouter();
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<any[]>([]);
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [selectedSpec, setSelectedSpec] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [location, setLocation] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Location permission denied');
+        return;
+      }
+
+      const userLocation = await Location.getCurrentPositionAsync({});
+      setLocation(userLocation.coords);
+    })();
+  }, []);
 
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
         const snap = await getDocs(collection(db, 'doctors'));
-        const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Doctor)).filter(doc => doc.fullName);
-        const filtered = docs.filter(doc => !doc.isSuspended);
-        setDoctors(filtered);
+        const allDoctors = snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as { isSuspended?: boolean; location?: any; profession?: string; fullName?: string; map?: { lat: number; lng: number }; profileImageUrl?: string; phone?: string; }) }));
 
-        const specList = Array.from(new Set(filtered.map(doc => doc.profession))).sort();
+        const validDoctors = allDoctors.filter(doc => !doc.isSuspended && doc.location);
+        setDoctors(validDoctors);
+
+        const specList = Array.from(new Set(validDoctors.map(doc => doc.profession).filter((spec): spec is string => spec !== undefined))).sort();
         setSpecialties(['All', ...specList]);
       } catch (err) {
         console.error('Error fetching doctors:', err);
@@ -40,24 +48,52 @@ const SearchPage = () => {
     fetchDoctors();
   }, []);
 
-  const filteredDoctors = doctors.filter(doc => {
-    const matchesSpecialty = selectedSpec === 'All' || doc.profession === selectedSpec;
-    
-    const matchesSearch = 
-      searchQuery === '' || 
-      doc.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.profession.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesSpecialty && matchesSearch;
-  });
+  useEffect(() => {
+    const filtered = doctors.filter(doc => {
+      const matchesSpec = selectedSpec === 'All' || doc.profession === selectedSpec;
+      const matchesSearch =
+        searchQuery === '' ||
+        doc.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.profession?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSpec && matchesSearch;
+    });
+
+    setFilteredDoctors(filtered);
+  }, [doctors, selectedSpec, searchQuery]);
 
   return (
     <View style={styles.container}>
+
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="black" />
+      </TouchableOpacity>
+      
+      {location && (
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: parseFloat(location.latitude),
+            longitude: parseFloat(location.longitude),
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          }}
+        >
+          {filteredDoctors.map(doc => (
+            <Marker
+              key={doc.id}
+              coordinate={{
+                latitude: parseFloat(doc.map?.lat || 0),
+                longitude: parseFloat(doc.map?.lng || 0),
+              }}
+              title={doc.fullName}
+              description={doc.profession}
+              onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })}
+            />
+          ))}
+        </MapView>
+      )}
+
       <View style={styles.searchHeader}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <FontAwesome name="arrow-left" size={24} color="white" />
-        </TouchableOpacity>
-        
         <View style={styles.searchBar}>
           <FontAwesome name="search" size={20} color="#888" style={styles.searchIcon} />
           <TextInput
@@ -75,24 +111,22 @@ const SearchPage = () => {
         </View>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.professionScroll}>
-        {specialties.map((item) => (
-          <TouchableOpacity
-            key={item}
-            onPress={() => setSelectedSpec(item)}
-            style={[
-              styles.professionText,
-              selectedSpec === item && { backgroundColor: '#fff' }
-            ]}
-          >
-            <Text style={{ color: selectedSpec === item ? '#000' : '#fff' }}>{item}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.professionScroll}>
+          {specialties.map(spec => (
+            <TouchableOpacity
+              key={spec}
+              onPress={() => setSelectedSpec(spec)}
+              style={[styles.professionText, selectedSpec === spec && { backgroundColor: '#fff' }]}
+            >
+              <Text style={{ color: selectedSpec === spec ? '#000' : '#fff' }}>{spec}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-      <ScrollView contentContainerStyle={styles.cardsWrapper}>
-        {filteredDoctors.length > 0 ? (
-          filteredDoctors.map((doc) => (
+      <ScrollView style={styles.content}>
+
+        <View style={styles.cardsWrapper}>
+          {filteredDoctors.map(doc => (
             <View key={doc.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <Image
@@ -103,54 +137,51 @@ const SearchPage = () => {
               </View>
 
               <View style={styles.divider} />
-
-              <View style={styles.cardDetails}>
-                <Text style={styles.detailText}>{doc.profession}</Text>
-                <Text style={styles.detailText}></Text>
-                <Text style={styles.detailText}>{doc.phone}</Text>
-              </View>
+              <Text style={styles.detailText}>{doc.profession}</Text>
+              <Text style={styles.detailText}>Lat: {doc.location?._lat}</Text>
+              <Text style={styles.detailText}>Lng: {doc.location?.lng}</Text>
+              <Text style={styles.detailText}>{doc.phone}</Text>
 
               <View style={styles.cardActions}>
-                <TouchableOpacity 
-                  onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })} 
-                  style={styles.actionBtn}
-                >
+                <TouchableOpacity onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })} style={styles.actionBtn}>
                   <FontAwesome name="eye" size={16} color="white" />
                   <Text style={styles.btnText}>View</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity 
-                  onPress={() => router.push({ pathname: '/booking/[id]', params: { id: doc.id } })} 
-                  style={styles.actionBtn}
-                >
+                <TouchableOpacity onPress={() => router.push({ pathname: '/booking/[id]', params: { id: doc.id } })} style={styles.actionBtn}>
                   <FontAwesome name="calendar" size={16} color="white" />
                   <Text style={styles.btnText}>Book</Text>
                 </TouchableOpacity>
               </View>
             </View>
-          ))
-        ) : (
-          <Text style={styles.noResultsText}>No doctors found matching your search</Text>
-        )}
+          ))}
+        </View>
       </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#111111',
-    flex: 1,
-    paddingTop: 50,
-  },
+  container: { flex: 1, backgroundColor: '#111' },
+  map: { width: Dimensions.get('window').width, height: 300, zIndex: 0, position: 'relative', top: 0 },
+  content: { flex: 1, left: 0, right: 0, zIndex: 1},
+
   searchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
+    marginTop: 20,
     marginBottom: 20,
+    maxHeight: 40,
+
   },
   backButton: {
+    position: 'absolute',
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    top: 0,
     marginRight: 15,
+    zIndex: 1,
   },
   searchBar: {
     flex: 1,
@@ -158,39 +189,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 10,
-    paddingHorizontal: 15,
     height: 50,
+    paddingHorizontal: 10,
   },
   searchIcon: {
     color: 'black',
     marginRight: 10,
   },
   searchInput: {
+    padding: 10,
     flex: 1,
-    color: 'white',
+    color: 'black',
     fontSize: 16,
     paddingVertical: 10,
 
   },
   professionScroll: {
-    paddingHorizontal: 20,
-    maxHeight: 50,
-    marginBottom: 10,
+    paddingHorizontal: 15,
+    maxHeight: 45,
   },
+
   professionText: {
-    height: 40,
-    padding: 10,
-    borderWidth: 1,
-    width: 'auto',
-    backgroundColor: '#2c2c2c',
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    backgroundColor: '#333',
     marginRight: 10,
     borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardsWrapper: {
-    padding: 20,
-    gap: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
   },
   card: {
     backgroundColor: '#2c2c2c',
@@ -214,26 +245,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  cardDetails: {
-    marginTop: 10,
-    alignItems: 'flex-start',
-    gap: 3,
-  },
-  detailText: {
-    color: '#fff',
-    fontSize: 13,
-    padding: 5
-  },
   divider: {
     height: 1,
     backgroundColor: '#444',
     marginVertical: 10,
-    marginTop: 20
+  },
+  detailText: {
+    color: '#fff',
+    fontSize: 13,
+    paddingVertical: 2,
   },
   cardActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 10,
+    marginTop: 10,
   },
   actionBtn: {
     flexDirection: 'row',
@@ -248,12 +274,6 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
   },
-  noResultsText: {
-    color: 'white',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 40,
-  }
 });
 
 export default SearchPage;
