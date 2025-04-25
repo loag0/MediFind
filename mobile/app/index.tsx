@@ -1,33 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
 import bgImg from '../assets/images/landing-page_background.jpg';
 import { useRouter } from 'expo-router';
+import LoadingScreen from './components/LoadingScreen';
 
 export default function Index() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  if (loading) return <LoadingScreen />;
+
+  const handleNav = (route: '/' | '/guestHome' | '/register' | '/login') => {
+    setLoading(true);
+    setTimeout(() => {
+      router.push(route);
+    }, 500);
+  };
 
   return (
-
     <ImageBackground source={bgImg} style={styles.container} resizeMode='cover'>
-    
-    <Image
+      <Image
         source={require('../assets/images/logo_whiteText.png')}
         style={styles.logo}
         resizeMode='contain'
       />
 
-      <Text style={styles.welcometext}> Find the help you need</Text>
-      
-      <View style={styles.bottomBox}>
+      <Text style={styles.welcometext}>Find the help you need</Text>
 
-        <TouchableOpacity style={styles.button} 
-          onPress={() => router.push('./register')}>
-          <Text style={styles.buttonText}>Register</Text>    
+      <View style={styles.bottomBox}>
+        <TouchableOpacity style={styles.button} onPress={() => handleNav('/register')}>
+          <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} 
-          onPress={() => router.push('./login')}>
-          <Text style={styles.buttonText}>Login</Text>    
+        <TouchableOpacity style={styles.button} onPress={() => handleNav('/login')}>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
         <View style={styles.dividerContainer}>
@@ -36,13 +42,12 @@ export default function Index() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity onPress={() => router.push('./guestHome')}>
-          <Text style={styles.guestText}>Continue as Guest </Text>
+        <TouchableOpacity onPress={() => handleNav('/guestHome')}>
+          <Text style={styles.guestText}>Continue as Guest</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
   );
-  
 }
 
 const styles = StyleSheet.create({
@@ -53,9 +58,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: '75%',
-    height: 100, 
+    height: 100,
     flexShrink: 1,
-    marginTop: 300
+    marginTop: 300,
   },
   welcometext: {
     color: '#fff',
@@ -108,13 +113,12 @@ const styles = StyleSheet.create({
   orText: {
     marginHorizontal: 10,
     color: '#777',
-    fontWeight: 500,
+    fontWeight: '500',
   },
   guestText: {
     color: '#fff',
     fontSize: 16,
     textDecorationLine: 'underline',
     marginBottom: 10,
-  }
+  },
 });
-

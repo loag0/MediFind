@@ -148,10 +148,6 @@ const SearchPage = () => {
                   <Text style={styles.btnText}>View</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push({ pathname: '/booking/[id]', params: { id: doc.id } })} style={styles.actionBtn}>
-                  <FontAwesome name="calendar" size={16} color="white" />
-                  <Text style={styles.btnText}>Book</Text>
-                </TouchableOpacity>
               </View>
             </View>
           ))}
@@ -170,7 +166,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: 20,
+    marginTop: 30,
     marginBottom: 20,
     maxHeight: 40,
 
@@ -264,10 +260,12 @@ const styles = StyleSheet.create({
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#005bcc',
+    justifyContent: 'center',
+    backgroundColor: '#11cc77',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,
+    width: 100,
   },
   btnText: {
     color: 'white',

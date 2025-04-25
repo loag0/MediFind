@@ -40,7 +40,7 @@ export default function DoctorDetails() {
         ]
       );
     } else {
-      router.push({ pathname: '/booking/[id]', params: { id } });
+      router.push({ pathname: '/booking/[id]', params: { id }});
     }
   };
 
@@ -219,14 +219,16 @@ const styles = StyleSheet.create({
   bookButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#005bcc',
+    backgroundColor: '#033603',
     padding: 15,
     borderRadius: 8,
     justifyContent: 'center',
     marginTop: 30,
+    maxWidth: 200,
+    marginHorizontal: 'auto',
   },
   bookButtonUnavailable: {
-    backgroundColor: '#444',
+    backgroundColor: '#360303',
   },
   bookButtonText: {
     color: 'white',

@@ -5,149 +5,145 @@ import { FontAwesome } from '@expo/vector-icons';
 import { db } from '../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import LoadingScreen from './components/LoadingScreen';
 
 const Home = () => {
-    const router = useRouter();
-    const [user, setUser] = useState({ firstName: '', lastName: '' });
-    const auth = getAuth();
-    
-    interface Doctor {
-        id: string;
-        isSuspended: boolean;
-        profession: string;
-        fullName: string;
-        profileImageUrl?: string;
-        location?: string;
-        phone?: string;
-    }
+  const router = useRouter();
+  const [user, setUser] = useState({ firstName: '', lastName: '' });
+  const [loading, setLoading] = useState(true);
+  const auth = getAuth();
 
-    const [doctors, setDoctors] = useState<Doctor[]>([]);
-    const [specialties, setSpecialties] = useState<string[]>([]);
-    const [selectedSpec, setSelectedSpec] = useState('All');
+  interface Doctor {
+    id: string;
+    isSuspended: boolean;
+    profession: string;
+    fullName: string;
+    profileImageUrl?: string;
+    location?: string;
+    phone?: string;
+  }
 
-    useEffect(() => {
-      const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [selectedSpec, setSelectedSpec] = useState('All');
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const authUser = auth.currentUser;
         if (authUser) {
-          try {
-            const userRef = doc(db, "users", authUser.uid);
-            const userSnap = await getDoc(userRef);
-            
-            if (userSnap.exists()) {
-              const userData = userSnap.data();
-              setUser({
-                firstName: userData.firstName || '',
-                lastName: userData.lastName || ''
-              });
-            } else {
-              console.log("No user document found!");
-            }
-          } catch (error) {
-            console.error("Error fetching user data:", error);
+          const userSnap = await getDoc(doc(db, 'users', authUser.uid));
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setUser({
+              firstName: userData.firstName || '',
+              lastName: userData.lastName || '',
+            });
           }
-        } else {
-          setUser({ firstName: '', lastName: '' });
         }
-      });
-      
-      return () => unsubscribe();
-    }, []);
 
-    useEffect(() => {
-        const fetchDoctors = async () => {
-            try {
-                const snap = await getDocs(collection(db, 'doctors'));
-                const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Doctor)).filter(doc => doc.fullName);
-                const filtered = docs.filter(doc => !doc.isSuspended);
-                setDoctors(filtered);
+        const snap = await getDocs(collection(db, 'doctors'));
+        const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Doctor));
+        const filtered = docs.filter(doc => !doc.isSuspended);
+        setDoctors(filtered);
 
-                const specList = Array.from(new Set(filtered.map(doc => doc.profession))).sort();
-                setSpecialties(['All', ...specList]);
-            } catch (err) {
-                console.error('Error fetching doctors:', err);
-            }
-        };
+        const specList = Array.from(new Set(filtered.map(doc => doc.profession))).sort();
+        setSpecialties(['All', ...specList]);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false); // loading ends here
+      }
+    };
 
-        fetchDoctors();
-    }, []);
+    loadInitialData();
+  }, []);
 
-    const filteredDoctors = selectedSpec === 'All'
-        ? doctors
-        : doctors.filter(doc => doc.profession === selectedSpec);
+  const filteredDoctors =
+    selectedSpec === 'All' ? doctors : doctors.filter(doc => doc.profession === selectedSpec);
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Image
-                    style={styles.logo}
-                    source={require('../assets/images/logo_whiteText.png')}
-                    resizeMode='contain'
-                />
-            <View style={styles.navBtns}>
-                <TouchableOpacity onPress={() => router.push('./searchPage')}>
-                    <FontAwesome name="search" size={24} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push('./userProfile')}>
-                     <FontAwesome name="user" size={24} color="white" />
-                 </TouchableOpacity>
-            </View>
+  if (loading) return <LoadingScreen message="Loading doctors and user..." />;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Image
+          style={styles.logo}
+          source={require('../assets/images/logo_whiteText.png')}
+          resizeMode="contain"
+        />
+        <View style={styles.navBtns}>
+          <TouchableOpacity onPress={() => router.push('./searchPage')}>
+            <FontAwesome name="search" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('./userProfile')}>
+            <FontAwesome name="user" size={24} color="white" />
+          </TouchableOpacity>
         </View>
+      </View>
 
-        <Text style={styles.welcomeText}>WELCOME,</Text>
-        <Text style={styles.nameText}>
-            {user.firstName?.toUpperCase() || "" } {user.lastName?.toUpperCase() || ""}
-        </Text>
+      <Text style={styles.welcomeText}>WELCOME,</Text>
+      <Text style={styles.nameText}>
+        {user.firstName?.toUpperCase()} {user.lastName?.toUpperCase()}
+      </Text>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.professionScroll}>
-            {specialties.map((item) => (
-                <TouchableOpacity
-                    key={item}
-                    onPress={() => setSelectedSpec(item)}
-                    style={[
-                    styles.professionText,
-                    selectedSpec === item && { backgroundColor: '#fff' }
-                    ]}
-                >
-                <Text style={{ color: selectedSpec === item ? '#000' : '#fff' }}>{item}</Text>
-                </TouchableOpacity>
-            ))}
-        </ScrollView>
-
-        <ScrollView contentContainerStyle={styles.cardsWrapper}>
-            {filteredDoctors.map((doc) => (
-                <View key={doc.id} style={styles.card}>
-                    <View style={styles.cardTop}>
-                        <Image
-                            source={{ uri: doc.profileImageUrl || './assets/images/placeholder-profile.png' }}
-                            style={styles.cardImage}
-                        />
-                    <Text style={styles.cardName}>Dr. {doc.fullName}</Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.cardDetails}>
-                <Text style={styles.detailText}>{doc.profession}</Text>
-                <Text style={styles.detailText}></Text>
-                <Text style={styles.detailText}>{doc.phone}</Text>
-                </View>
-
-                <View style={styles.cardActions}>
-                    <TouchableOpacity onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })} style={styles.actionBtn}>
-                        <FontAwesome name="eye" size={16} color="white" />
-                        <Text style={styles.btnText}>View</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => router.push({ pathname: '/booking/[id]', params: { id: doc.id } })} style={styles.actionBtn}>
-                        <FontAwesome name="calendar" size={16} color="white" />
-                        <Text style={styles.btnText}>Book</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.professionScroll}>
+        {specialties.map(item => (
+          <TouchableOpacity
+            key={item}
+            onPress={() => setSelectedSpec(item)}
+            style={[
+              styles.professionText,
+              selectedSpec === item && { backgroundColor: '#fff' },
+            ]}
+          >
+            <Text style={{ color: selectedSpec === item ? '#000' : '#fff' }}>{item}</Text>
+          </TouchableOpacity>
         ))}
-        </ScrollView>
-        </View>
-    );
+      </ScrollView>
+
+      <ScrollView contentContainerStyle={styles.cardsWrapper}>
+        {filteredDoctors.length === 0 ? (
+          <Text style={{ color: 'white', textAlign: 'center', marginTop: 40 }}>
+            No doctors available right now.
+          </Text>
+        ) : (
+          filteredDoctors.map(doc => (
+            <View key={doc.id} style={styles.card}>
+              <View style={styles.cardTop}>
+                <Image
+                  source={{ uri: doc.profileImageUrl || './assets/images/placeholder-profile.png' }}
+                  style={styles.cardImage}
+                />
+                <Text style={styles.cardName}>Dr. {doc.fullName}</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.cardDetails}>
+                <Text style={styles.detailText}>{doc.profession}</Text>
+                <Text style={styles.detailText}>{doc.phone}</Text>
+              </View>
+
+              <View style={styles.cardActions}>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })
+                  }
+                  style={styles.actionBtn}
+                >
+                  <FontAwesome name="eye" size={16} color="white" />
+                  <Text style={styles.btnText}>View</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+      </ScrollView>
+    </View>
+  );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -266,10 +262,12 @@ const styles = StyleSheet.create({
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#005bcc',
+    justifyContent: 'center',
+    backgroundColor: '#11cc77',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,
+    width: 100,
   },
   
   btnText: {

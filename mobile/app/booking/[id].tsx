@@ -6,7 +6,7 @@ import { getAuth } from 'firebase/auth';
 import { db } from '../../firebase/firebase';
 import { doc, getDoc, addDoc, collection } from 'firebase/firestore';
 import { FontAwesome } from '@expo/vector-icons';
-//import { format } from 'date-fns';
+import { format } from 'date-fns';
 
 export default function Booking() {
   const { id } = useLocalSearchParams();
@@ -60,7 +60,7 @@ export default function Booking() {
     fetchData();
   }, [id]);
 
-  //const formattedDate = format ? format(date, 'PPP p') : date.toLocaleString();
+  const formattedDate = format ? format(date, 'PPP p') : date.toLocaleString();
 
   const handleSubmit = async () => {
     if (!doctor || !userData.name) {
@@ -69,7 +69,7 @@ export default function Booking() {
     }
 
     const subject = 'Appointment Request';
-    const body = `Hi Dr. ${doctor.fullName},\n\nI'd like to book an appointment on.\n\nName: ${userData.name}\nPhone: ${userData.phone}\nEmail: ${userData.email}\nPurpose: ${purpose}`;
+    const body = `Hi Dr. ${doctor.fullName},\n\nI'd like to book an appointment on ${formattedDate}.\n\nName: ${userData.name}\nPhone: ${userData.phone}\nEmail: ${userData.email}\nPurpose: ${purpose}`;
     const mailto = `mailto:${doctor.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     try {
@@ -118,7 +118,7 @@ export default function Booking() {
       <TextInput style={styles.input} value={userData.phone} editable={true} />
 
       <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.input}>
-        {/*<Text style={styles.inputText}>{formattedDate}</Text>*/}
+        <Text style={styles.inputText}>{formattedDate}</Text>
       </TouchableOpacity>
 
       {showPicker && (
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   inputText: {
-    color: '#fff',
+    color: '#000',
   },
   textarea: {
     height: 100,
