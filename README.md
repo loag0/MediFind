@@ -81,7 +81,7 @@ npm run dev   # or npm start if using CRA
 
 ## 👨‍⚕️ Features
 ### Mobile
-- Register / login (Email, Google, Facebook)
+- Register / login (Email, Google)
 - View and search doctor profiles
 - Book appointments
 - View + edit profile

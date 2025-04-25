@@ -1,6 +1,6 @@
 # MediFind Mobile App
 
-This is the React Native mobile app built using **Expo**. It allows users to search for doctors, view profiles, and book appointments. Auth supports email/password, Google, and Facebook login.
+This is the React Native mobile app built using **Expo**. It allows users to search for doctors, view profiles, and book appointments. Auth supports email/password, Google login.
 
 ## 🧠 Stack
 
@@ -43,7 +43,7 @@ export const db = getFirestore(app);
 ### All routing is handled via `app/_layout.tsx` using Expo Router 
 
 ## 👨‍⚕️ Features
-- Register / login (Email, Google, Facebook)
+- Register / login (Email, Google)
 - View and search doctor profiles
 - Book appointments
 - View + edit profile

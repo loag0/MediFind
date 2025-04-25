@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "MediFind",
     "slug": "mobile",
     "owner": "username0",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/app_icon.png",
+    "icon": "../assets/images/app_icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
