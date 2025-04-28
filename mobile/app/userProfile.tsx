@@ -7,59 +7,42 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Alert, 
+  ActivityIndicator,
   Modal,
-  FlatList,
-  ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from 'firebase/auth';
+import { deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import LoadingScreen from './components/LoadingScreen';
-
-const countryCodes = [
-  { code: '+267', country: 'Botswana' },
-  { code: '+27', country: 'South Africa' },
-  { code: '+263', country: 'Zimbabwe' },
-  { code: '+260', country: 'Zambia' },
-];
 
 export default function UserProfile() {
   const router = useRouter();
   const auth = getAuth();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  
+
   const [userData, setUserData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
   });
-  
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+1');
-  const [modalVisible, setModalVisible] = useState(false);
-  
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [showChangePassword, setShowChangePassword] = useState(false);
 
-  const parsePhoneWithCode = (fullPhone: string) => {
-    if (!fullPhone) return { code: '+267', number: '' };
-
-    const countryCode = countryCodes.find(c => 
-      fullPhone.startsWith(c.code)
-    )?.code || '+267';
-    
-    const number = fullPhone.substring(countryCode.length);
-    return { code: countryCode, number };
-  };
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -74,24 +57,15 @@ export default function UserProfile() {
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
-          if (data && typeof data.firstName === 'string' && typeof data.lastName === 'string' && typeof data.email === 'string' && typeof data.phone === 'string') {
-            setUserData({
-              firstName: data.firstName,
-              lastName: data.lastName,
-              email: data.email,
-              phone: data.phone,
-            });
-          } else {
-            console.error('Invalid user data:', data);
-            Alert.alert('Error', 'Invalid user data');
-          }
-          
+          setUserData({
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            email: data.email || '',
+            phone: data.phone || '',
+          });
           setFirstName(data.firstName || '');
           setLastName(data.lastName || '');
-          
-          const { code, number } = parsePhoneWithCode(data.phone);
-          setCountryCode(code);
-          setPhone(number);
+          setPhone(data.phone || '');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -110,33 +84,29 @@ export default function UserProfile() {
       return;
     }
 
+    if (!/^\d+$/.test(phone) || phone.length < 7) {
+      Alert.alert('Error', 'Please enter a valid phone number');
+      return;
+    }
+
     setUpdating(true);
     try {
       const currentUser = auth.currentUser;
-      if (!currentUser) {
-        throw new Error('User not authenticated');
-      }
-
-      // Validate phone
-      if (!/^\d+$/.test(phone) || phone.length < 7) {
-        Alert.alert('Error', 'Please enter a valid phone number');
-        setUpdating(false);
-        return;
-      }
+      if (!currentUser) throw new Error('User not authenticated');
 
       await updateDoc(doc(db, 'users', currentUser.uid), {
         firstName,
         lastName,
-        phone: `${countryCode}${phone}`
+        phone: phone,
       });
 
       Alert.alert('Success', 'Profile updated successfully');
-      
+
       setUserData(prev => ({
         ...prev,
         firstName,
         lastName,
-        phone: `${countryCode}${phone}`
+        phone,
       }));
     } catch (error) {
       console.error('Update error:', error);
@@ -148,35 +118,32 @@ export default function UserProfile() {
 
   const handleChangePassword = async () => {
     setPasswordError('');
-    
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordError('All password fields are required');
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       setPasswordError('New passwords do not match');
       return;
     }
-    
+
     if (newPassword.length < 6) {
       setPasswordError('Password must be at least 6 characters');
       return;
     }
-    
+
     setUpdating(true);
     try {
       const user = auth.currentUser;
-      if (!user || !user.email) {
-        throw new Error('User not authenticated');
-      }
-      
+      if (!user || !user.email) throw new Error('User not authenticated');
+
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
       await reauthenticateWithCredential(user, credential);
-      
-      // Change password
+
       await updatePassword(user, newPassword);
-      
+
       Alert.alert('Success', 'Password changed successfully');
       setCurrentPassword('');
       setNewPassword('');
@@ -194,36 +161,57 @@ export default function UserProfile() {
     }
   };
 
-  const renderCountryItem = ({ item }: { item: { code: string; country: string } }) => (
-    <TouchableOpacity 
-      style={styles.countryItem}
-      onPress={() => {
-        setCountryCode(item.code);
-        setModalVisible(false);
-      }}
-    >
-      <Text style={styles.countryItemText}>{item.code} ({item.country})</Text>
-    </TouchableOpacity>
-  );
+  const confirmDeleteAccount = async () => {
+    setLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (!user || !user.email) throw new Error('User not authenticated');
+
+      const credential = EmailAuthProvider.credential(userData.email, deletePassword);
+      await reauthenticateWithCredential(user, credential);
+
+      await deleteDoc(doc(db, 'users', user.uid));
+      await deleteUser(user);
+
+      Alert.alert('Success', 'Account deleted successfully');
+      router.replace('/login');
+    } catch (error) {
+      console.error('Deletion error:', error);
+      Alert.alert(
+        'Error',
+        (error as { code?: string }).code === 'auth/wrong-password'
+          ? 'Incorrect password'
+          : 'Failed to delete account'
+      );
+    } finally {
+      setLoading(false);
+      setShowDeleteModal(false);
+      setDeletePassword('');
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
 
   if (loading) return <LoadingScreen message="Loading profile..." />;
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                <FontAwesome name="arrow-left" size={28} color="white" />
-        </TouchableOpacity>
+    <SafeAreaView style={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={{ paddingTop: 10, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
+        <View style={styles.container}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <FontAwesome name="arrow-left" size={28} color="white" />
+          </TouchableOpacity>
 
-        <Text style={styles.title}>Your Profile</Text>
+          <Text style={styles.title}>Your Profile</Text>
 
-        {/* Personal Information Section */}
-        <View style={styles.section}>
+          <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Information</Text>
           
           <Text style={styles.label}>Email</Text>
           <TextInput
-            style={[styles.input, { color: '#aaa' }]}
+            style={[styles.input, { color: '#fff' }]}
             value={userData.email}
             editable={false}
           />
@@ -248,13 +236,6 @@ export default function UserProfile() {
           
           <Text style={styles.label}>Phone Number</Text>
           <View style={styles.phoneContainer}>
-            <TouchableOpacity 
-              style={styles.countryCodeButton}
-              onPress={() => setModalVisible(true)}
-            >
-              <Text style={styles.countryCodeText}>{countryCode}</Text>
-              <FontAwesome name="caret-down" size={16} color="white" style={{ marginLeft: 5 }} />
-            </TouchableOpacity>
             
             <TextInput
               style={styles.phoneInput}
@@ -279,7 +260,6 @@ export default function UserProfile() {
           </TouchableOpacity>
         </View>
 
-        {/* Password Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Security</Text>
           
@@ -355,11 +335,7 @@ export default function UserProfile() {
             </TouchableOpacity>
           )}
         </View>
-        
-        {/* Account Management */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          
+
           <TouchableOpacity 
             style={styles.logoutButton}
             onPress={() => {
@@ -369,63 +345,52 @@ export default function UserProfile() {
           >
             <Text style={styles.buttonText}>Logout</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity 
             style={styles.deleteButton}
-            onPress={() => {
-              Alert.alert(
-                'Delete Account',
-                'Are you sure you want to delete your account? This action cannot be undone.',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { 
-                    text: 'Delete', 
-                    style: 'destructive',
-                    onPress: () => Alert.alert('Coming Soon', 'Account deletion will be available in a future update.')
-                  }
-                ]
-              );
-            }}
+            onPress={handleDeleteAccount}
           >
             <Text style={styles.deleteButtonText}>Delete Account</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
 
-      {/* Country Code Modal */}
+      {/* Delete Account Modal */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={showDeleteModal}
+        onRequestClose={() => setShowDeleteModal(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Country Code</Text>
-            
-            <FlatList
-              data={countryCodes}
-              renderItem={renderCountryItem}
-              keyExtractor={(item) => item.code}
-              style={styles.countryList}
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirm Deletion</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor="#999"
+              secureTextEntry
+              value={deletePassword}
+              onChangeText={setDeletePassword}
             />
-            
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Cancel</Text>
-            </TouchableOpacity>
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity onPress={() => setShowDeleteModal(false)} style={[styles.button, styles.cancelButton]}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmDeleteAccount} style={[styles.button, styles.saveButton]}>
+                <Text style={styles.buttonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: '#111111',
   },
   container: {
@@ -434,7 +399,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#111111',
   },
   backButton: {
-    paddingTop: 30,
+    paddingTop: 0,
     paddingLeft: 5,
   },
   title: {
@@ -444,6 +409,30 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 30,
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#222',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
   },
   section: {
     backgroundColor: '#222',
@@ -457,47 +446,14 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 15,
   },
-  editIconContainer: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#005bcc',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#111111',
-  },
   label: {
     color: '#ccc',
     marginBottom: 5,
     fontSize: 14,
   },
-  input: {
-    backgroundColor: '#333',
-    borderRadius: 8,
-    padding: 12,
-    color: 'white',
-    marginBottom: 15,
-  },
   phoneContainer: {
     flexDirection: 'row',
     marginBottom: 15,
-  },
-  countryCodeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#333',
-    borderRadius: 8,
-    padding: 12,
-    width: '30%',
-    marginRight: 8,
-  },
-  countryCodeText: {
-    color: 'white',
   },
   phoneInput: {
     flex: 1,
@@ -510,20 +466,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  input: {
+    backgroundColor: '#333',
+    borderRadius: 8,
+    padding: 12,
+    color: 'white',
+    marginBottom: 15,
+  },
   button: {
     flex: 1,
-    padding: 14,
-    borderRadius: 8,
+    marginHorizontal: 5,
+    padding: 12,
+    backgroundColor: '#333',
+    borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   cancelButton: {
-    backgroundColor: '#444',
-    marginRight: 8,
+    backgroundColor: '#777',
   },
   saveButton: {
-    backgroundColor: '#005bcc',
-    marginLeft: 8,
+    backgroundColor: '#e63946',
   },
   updateButton: {
     backgroundColor: '#005bcc',
@@ -538,79 +500,30 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  logoutButton: {
-    backgroundColor: '#444',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  deleteButton: {
-    borderWidth: 1,
-    borderColor: '#ff4040',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
   buttonText: {
     color: 'white',
-    fontWeight: '500',
-    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#666',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: 'center',
   },
   deleteButtonText: {
-    color: '#ff4040',
-    fontWeight: '500',
-    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
   errorText: {
     color: '#ff4040',
     marginBottom: 15,
-  },
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '80%',
-    maxHeight: '70%',
-    backgroundColor: '#222',
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-  countryList: {
-    width: '100%',
-  },
-  countryItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    width: '100%',
-  },
-  countryItemText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  closeButton: {
-    marginTop: 15,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#444',
-    width: '100%',
-  },
-  closeButtonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 16,
   },
 });

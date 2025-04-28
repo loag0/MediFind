@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Dimensions, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { collection, getDocs } from 'firebase/firestore';
@@ -9,6 +10,8 @@ import { FontAwesome } from '@expo/vector-icons';
 
 const SearchPage = () => {
   const router = useRouter();
+  const [mapLoading, setMapLoading] = useState(true);
+  const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<any[]>([]);
   const [specialties, setSpecialties] = useState<string[]>([]);
@@ -32,16 +35,32 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
+        setLoadingDoctors(true);
         const snap = await getDocs(collection(db, 'doctors'));
-        const allDoctors = snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as { isSuspended?: boolean; location?: any; profession?: string; fullName?: string; map?: { lat: number; lng: number }; profileImageUrl?: string; phone?: string; }) }));
-
+        const allDoctors = snap.docs.map(doc => ({ 
+          id: doc.id, 
+          ...(doc.data() as { 
+            isSuspended?: boolean; 
+            location?: any; 
+            profession?: string; 
+            fullName?: string; 
+            map?: { lat: number; lng: number }; 
+            profileImageUrl?: string; 
+            phone?: string; 
+          }) 
+        }));
+    
         const validDoctors = allDoctors.filter(doc => !doc.isSuspended && doc.location);
         setDoctors(validDoctors);
-
-        const specList = Array.from(new Set(validDoctors.map(doc => doc.profession).filter((spec): spec is string => spec !== undefined))).sort();
+    
+        const specList = Array.from(
+          new Set(validDoctors.map(doc => doc.profession).filter((spec): spec is string => spec !== undefined))
+        ).sort();
         setSpecialties(['All', ...specList]);
       } catch (err) {
         console.error('Error fetching doctors:', err);
+      } finally {
+        setLoadingDoctors(false);
       }
     };
 
@@ -62,12 +81,13 @@ const SearchPage = () => {
   }, [doctors, selectedSpec, searchQuery]);
 
   return (
+    <SafeAreaView style={styles.container}>
     <View style={styles.container}>
-
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <FontAwesome name="arrow-left" size={24} color="black" />
       </TouchableOpacity>
       
+      <View style={styles.mapContainer}>
       {location && (
         <MapView
           style={styles.map}
@@ -77,21 +97,34 @@ const SearchPage = () => {
             latitudeDelta: 0.1,
             longitudeDelta: 0.1,
           }}
+          onMapReady={() => setMapLoading(false)}
+          showsUserLocation={true}
+          onRegionChangeComplete={() => setMapLoading(false)}
         >
-          {filteredDoctors.map(doc => (
-            <Marker
-              key={doc.id}
-              coordinate={{
-                latitude: parseFloat(doc.map?.lat || 0),
-                longitude: parseFloat(doc.map?.lng || 0),
-              }}
-              title={doc.fullName}
-              description={doc.profession}
-              onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })}
-            />
-          ))}
+          {filteredDoctors.map(doc => {
+            const lat = parseFloat(doc.map?.lat ?? doc.location?._lat ?? '0');
+            const lng = parseFloat(doc.map?.lng ?? doc.location?._long ?? '0');
+
+            if (!lat || !lng) return null;
+
+            return (
+              <Marker
+                key={doc.id}
+                coordinate={{ latitude: lat, longitude: lng }}
+                title={doc.fullName}
+                description={doc.profession}
+                onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })}
+              />
+            );
+        })}
         </MapView>
       )}
+      {mapLoading && (
+      <View style={styles.mapLoadingOverlay}>
+        <Text style={styles.mapLoadingText}>Loading Map...</Text>
+      </View>
+      )}
+      </View>
 
       <View style={styles.searchHeader}>
         <View style={styles.searchBar}>
@@ -124,9 +157,15 @@ const SearchPage = () => {
         </ScrollView>
 
       <ScrollView style={styles.content}>
-
         <View style={styles.cardsWrapper}>
-          {filteredDoctors.map(doc => (
+          {loadingDoctors ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#11cc77" />
+              <Text style={styles.loadingText}>Loading doctors...</Text>
+            </View>
+          ) : filteredDoctors.length === 0 ? (
+            <Text style={styles.noDocText}>No doctors available right now.</Text>
+          ) : filteredDoctors.map(doc => (
             <View key={doc.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <Image
@@ -138,8 +177,8 @@ const SearchPage = () => {
 
               <View style={styles.divider} />
               <Text style={styles.detailText}>{doc.profession}</Text>
-              <Text style={styles.detailText}>Lat: {doc.location?._lat}</Text>
-              <Text style={styles.detailText}>Lng: {doc.location?.lng}</Text>
+              <Text style={styles.detailText}>Lat: {doc.location?._lat || 'N/A'}</Text>
+              <Text style={styles.detailText}>Lng: {doc.location?._long || 'N/A'}</Text>
               <Text style={styles.detailText}>{doc.phone}</Text>
 
               <View style={styles.cardActions}>
@@ -154,27 +193,52 @@ const SearchPage = () => {
         </View>
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#111' },
-  map: { width: Dimensions.get('window').width, height: 300, zIndex: 0, position: 'relative', top: 0 },
+  
   content: { flex: 1, left: 0, right: 0, zIndex: 1},
 
+  mapLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: Dimensions.get('window').width,
+    height: 300,
+    backgroundColor: 'rgb(216, 216, 216)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  mapLoadingText: {
+    color: 'white',
+    fontSize: 18,
+  },
+  mapContainer: {
+    height: 300,
+    width: '100%',
+    position: 'relative',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+  },
   searchHeader: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     marginTop: 30,
     marginBottom: 20,
     maxHeight: 40,
-
   },
   backButton: {
     position: 'absolute',
     paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingVertical: 50,
     top: 0,
     marginRight: 15,
     zIndex: 1,
@@ -214,6 +278,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 200,
+  },
+  loadingText: {
+    color: 'white',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  noDocText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
   },
   cardsWrapper: {
     paddingVertical: 15,

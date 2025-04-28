@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { db } from '../firebase/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import LoadingScreen from './components/LoadingScreen';
 
 const Home = () => {
   const router = useRouter();
   const [user, setUser] = useState({ firstName: '', lastName: '' });
-  const [loading, setLoading] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingDoctors, setLoadingDoctors] = useState(true);
   const auth = getAuth();
 
   interface Doctor {
@@ -24,11 +24,12 @@ const Home = () => {
   }
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [specialties, setSpecialties] = useState<string[]>(['All']);
   const [selectedSpec, setSelectedSpec] = useState('All');
 
   useEffect(() => {
-    const loadInitialData = async () => {
+    // Load user data
+    const loadUserData = async () => {
       try {
         const authUser = auth.currentUser;
         if (authUser) {
@@ -41,7 +42,16 @@ const Home = () => {
             });
           }
         }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
 
+    // Load doctors data
+    const loadDoctorsData = async () => {
+      try {
         const snap = await getDocs(collection(db, 'doctors'));
         const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Doctor));
         const filtered = docs.filter(doc => !doc.isSuspended);
@@ -50,19 +60,18 @@ const Home = () => {
         const specList = Array.from(new Set(filtered.map(doc => doc.profession))).sort();
         setSpecialties(['All', ...specList]);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading doctors data:', error);
       } finally {
-        setLoading(false); // loading ends here
+        setLoadingDoctors(false);
       }
     };
 
-    loadInitialData();
+    loadUserData();
+    loadDoctorsData();
   }, []);
 
   const filteredDoctors =
     selectedSpec === 'All' ? doctors : doctors.filter(doc => doc.profession === selectedSpec);
-
-  if (loading) return <LoadingScreen message="Loading doctors and user..." />;
 
   return (
     <View style={styles.container}>
@@ -83,9 +92,13 @@ const Home = () => {
       </View>
 
       <Text style={styles.welcomeText}>WELCOME,</Text>
-      <Text style={styles.nameText}>
-        {user.firstName?.toUpperCase()} {user.lastName?.toUpperCase()}
-      </Text>
+      {loadingUser ? (
+        <Text style={styles.nameText}>...</Text>
+      ) : (
+        <Text style={styles.nameText}>
+          {user.firstName?.toUpperCase()} {user.lastName?.toUpperCase()}
+        </Text>
+      )}
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.professionScroll}>
         {specialties.map(item => (
@@ -103,8 +116,13 @@ const Home = () => {
       </ScrollView>
 
       <ScrollView contentContainerStyle={styles.cardsWrapper}>
-        {filteredDoctors.length === 0 ? (
-          <Text style={{ color: 'white', textAlign: 'center', marginTop: 40 }}>
+        {loadingDoctors ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#11cc77" />
+            <Text style={styles.loadingText}>Loading doctors...</Text>
+          </View>
+        ) : filteredDoctors.length === 0 ? (
+          <Text style={styles.noDocText}>
             No doctors available right now.
           </Text>
         ) : (
@@ -144,12 +162,10 @@ const Home = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#111111',
     flex: 1,
-
   },
   header: {
     top: 0,
@@ -201,9 +217,26 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   cardsWrapper: {
-    
     padding: 20,
     gap: 20,
+    minHeight: 300,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 300,
+  },
+  loadingText: {
+    color: 'white',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  noDocText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
   },
   card: {
     backgroundColor: '#2c2c2c',
@@ -211,26 +244,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
   },
-  
   cardTop: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 15,
   },
-  
   cardImage: {
     width: 60,
     height: 60,
     borderRadius: 30,
     backgroundColor: '#ccc',
   },
-  
   cardName: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
   },
-
   cardDetails: {
     marginTop: 10,
     alignItems: 'flex-start',
@@ -245,20 +274,17 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 12,
   },
-
   divider: {
     height: 1,
     backgroundColor: '#444',
     marginVertical: 10,
     marginTop: 20
   },
-
   cardActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 10,
   },
-  
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -269,7 +295,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     width: 100,
   },
-  
   btnText: {
     color: 'white',
     marginLeft: 6,

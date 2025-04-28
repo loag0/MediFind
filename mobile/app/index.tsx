@@ -1,38 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
-import bgImg from '../assets/images/landing-page_background.jpg';
 import { useRouter } from 'expo-router';
-import LoadingScreen from './components/LoadingScreen';
+import bgImg from '../assets/images/landing-page_background.png';
 
 export default function Index() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-
-  if (loading) return <LoadingScreen />;
-
-  const handleNav = (route: '/' | '/guestHome' | '/register' | '/login') => {
-    setLoading(true);
-    setTimeout(() => {
-      router.push(route);
-    }, 500);
-  };
 
   return (
-    <ImageBackground source={bgImg} style={styles.container} resizeMode='cover'>
+    <ImageBackground source={bgImg} style={styles.container} resizeMode="cover">
       <Image
         source={require('../assets/images/logo_whiteText.png')}
         style={styles.logo}
-        resizeMode='contain'
+        resizeMode="contain"
       />
 
       <Text style={styles.welcometext}>Find the help you need</Text>
 
       <View style={styles.bottomBox}>
-        <TouchableOpacity style={styles.button} onPress={() => handleNav('/register')}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.replace('./register')}
+        >
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={() => handleNav('/login')}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.replace('./login')}
+        >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
@@ -42,7 +37,7 @@ export default function Index() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity onPress={() => handleNav('/guestHome')}>
+        <TouchableOpacity onPress={() => router.replace('./guestHome')}>
           <Text style={styles.guestText}>Continue as Guest</Text>
         </TouchableOpacity>
       </View>
@@ -109,11 +104,6 @@ const styles = StyleSheet.create({
     height: 0.5,
     backgroundColor: '#fff',
     margin: 10,
-  },
-  orText: {
-    marginHorizontal: 10,
-    color: '#777',
-    fontWeight: '500',
   },
   guestText: {
     color: '#fff',

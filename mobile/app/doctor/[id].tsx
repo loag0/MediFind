@@ -6,9 +6,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/firebase';
 import LoadingScreen from '../components/LoadingScreen';
 import { Alert } from 'react-native';
+import { getAuth } from 'firebase/auth';
 
 export default function DoctorDetails() {
   const router = useRouter();
+  const auth = getAuth();
+  const isGuest = !auth.currentUser;
   const { id } = useLocalSearchParams<{ id: string }>();
   const [doctor, setDoctor] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,16 +118,22 @@ export default function DoctorDetails() {
 
       <Text style={styles.bio}>{doctor.bio}</Text>
 
-      <TouchableOpacity
-        style={[
+      {!isGuest ? (
+        <TouchableOpacity
+          style={[
           styles.bookButton,
           !isAvailable && doctor.workingHours?.start ? styles.bookButtonUnavailable : null
-        ]}
+          ]}
         onPress={handleBooking}
-      >
-        <FontAwesome name="calendar" size={20} color="white" />
-        <Text style={styles.bookButtonText}>Book Appointment</Text>
-      </TouchableOpacity>
+        >
+          <FontAwesome name="calendar" size={20} color="white" />
+          <Text style={styles.bookButtonText}>Book Appointment</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity className='guestWarning' style={styles.guestWarning} onPress={() => router.push('/login')}>
+          <Text style={styles.guestWarningText}>Login to book an appointment</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }
@@ -219,7 +228,7 @@ const styles = StyleSheet.create({
   bookButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#033603',
+    backgroundColor: '#00BB00',
     padding: 15,
     borderRadius: 8,
     justifyContent: 'center',
@@ -235,4 +244,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
   },
+  guestWarning: {
+    marginTop: 30,
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  guestWarningText: {
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  
 });

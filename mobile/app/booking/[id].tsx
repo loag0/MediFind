@@ -26,6 +26,8 @@ export default function Booking() {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [purpose, setPurpose] = useState('');
+  const [mode, setMode] = useState<'date' | 'time'>('date');
+  const [tempDate, setTempDate] = useState(new Date());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,6 +101,30 @@ export default function Booking() {
     }
   };
 
+  const onChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    
+    if (Platform.OS === 'android') {
+      setShowPicker(false);
+      if (event.type === 'set') {
+        if (mode === 'date') {
+          setTempDate(currentDate);
+          setMode('time');
+          setShowPicker(true);
+        } else {
+          setDate(currentDate);
+        }
+      }
+    } else {
+      setDate(currentDate);
+    }
+  };
+
+  const showDatepicker = () => {
+    setMode('date');
+    setShowPicker(true);
+  };
+
   if (loading) return (
     <View style={styles.container}>
       <Text style={styles.loading}>Loading...</Text>
@@ -117,18 +143,18 @@ export default function Booking() {
       <TextInput style={styles.input} value={userData.email} editable={true} />
       <TextInput style={styles.input} value={userData.phone} editable={true} />
 
-      <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.input}>
+      <TouchableOpacity onPress={showDatepicker} style={styles.input}>
         <Text style={styles.inputText}>{formattedDate}</Text>
       </TouchableOpacity>
 
       {showPicker && (
         <DateTimePicker
-          mode="datetime"
-          value={date}
-          onChange={(event, selectedDate) => {
-            setShowPicker(Platform.OS === 'ios');
-            if (selectedDate) setDate(selectedDate);
-          }}
+          testID="dateTimePicker"
+          value={mode === 'date' ? tempDate : date}
+          mode={mode}
+          is24Hour={true}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onChange}
         />
       )}
 
