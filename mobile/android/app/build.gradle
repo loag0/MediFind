@@ -86,7 +86,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.medifind"
+    namespace 'com.username0.medifind'
     defaultConfig {
         applicationId 'com.username0.medifind'
         minSdkVersion rootProject.ext.minSdkVersion

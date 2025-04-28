@@ -15,12 +15,10 @@ const Login = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Only navigate to home on successful login
       router.replace('/home');
     } catch (error) {
-      // Show error alert and stop loading state
       Alert.alert('Login Failed', (error as any)?.message ?? 'Something went wrong with your login');
-      setLoading(false); // Stop loading when there's an error
+      setLoading(false);
       setEmail('');
       setPassword('');
     }
