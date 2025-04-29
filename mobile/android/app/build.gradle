@@ -2,9 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.android'
 
-// 🧠 now you can add this:
-apply from: new File(["node", "--print", "require.resolve('react-native/scripts/react_native_gradle_plugin/package.gradle')"].execute(null, rootDir).text.trim())
-
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**
