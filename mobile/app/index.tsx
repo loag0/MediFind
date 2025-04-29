@@ -19,14 +19,14 @@ export default function Index() {
       <View style={styles.bottomBox}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.replace('./register')}
+          onPress={() => router.push('./register')}
         >
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.replace('./login')}
+          onPress={() => router.push('./login')}
         >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
@@ -37,7 +37,7 @@ export default function Index() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity onPress={() => router.replace('./guestHome')}>
+        <TouchableOpacity onPress={() => router.push('./guestHome')}>
           <Text style={styles.guestText}>Continue as Guest</Text>
         </TouchableOpacity>
       </View>
