@@ -1,7 +1,9 @@
-apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
-apply plugin: "com.google.gms.google-services"
+plugins{
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+    id 'org.jetbrains.kotlin.android'
+    id "com.facebook.react"
+}
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -176,8 +178,4 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-}
-plugins{
-    id 'com.android.application'
-    id 'com.google.gms.google-services'
 }
