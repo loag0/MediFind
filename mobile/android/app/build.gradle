@@ -1,3 +1,5 @@
+apply from: new File(["node", "--print", "require.resolve('react-native/scripts/react_native_gradle_plugin/package.gradle')"].execute(null, rootDir).text.trim())
+
 plugins{
     id 'com.android.application'
     id 'com.google.gms.google-services'
