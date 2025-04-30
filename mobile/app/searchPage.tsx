@@ -51,7 +51,16 @@ const SearchPage = () => {
           }) 
         }));
     
-        const validDoctors = allDoctors.filter(doc => !doc.isSuspended && doc.location);
+        const validDoctors = allDoctors.filter(doc => {
+          const loc = doc.location;
+          return (
+            !doc.isSuspended &&
+            loc &&
+            (loc.lat || loc.latitude || loc._lat) &&
+            (loc.lng || loc.longitude || loc._long)
+          );
+        });
+        
         setDoctors(validDoctors);
     
         const specList = Array.from(
@@ -105,21 +114,35 @@ const SearchPage = () => {
           onRegionChangeComplete={() => setMapLoading(false)}
         >
           {filteredDoctors.map(doc => {
-            const lat = parseFloat(doc.map?.lat ?? doc.location?._lat ?? '0');
-            const lng = parseFloat(doc.map?.lng ?? doc.location?._long ?? '0');
-
-            if (!lat || !lng) return null;
-
-            return (
-              <Marker
-                key={doc.id}
-                coordinate={{ latitude: lat, longitude: lng }}
-                title={doc.fullName}
-                description={doc.profession}
-                onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })}
-              />
-            );
-        })}
+  // Debug what's actually in the location object
+  console.log('Doctor location data:', doc.fullName, doc.location);
+  
+  // Skip if no location data
+  if (!doc.location) {
+    console.log('Missing location for doctor:', doc.fullName);
+    return null;
+  }
+  
+  // Extract coordinates from the location map
+  const lat = doc.location.latitude;
+  const lng = doc.location.longitude;
+  
+  // Skip if invalid coordinates
+  if (lat === undefined || lng === undefined || isNaN(lat) || isNaN(lng)) {
+    console.log('Invalid location for doctor:', doc.fullName);
+    return null;
+  }
+  
+  return (
+    <Marker
+      key={doc.id}
+      coordinate={{ latitude: 24.6581, longitude: 25.9122 }}
+      title={doc.fullName || 'Doctor'}
+      description={doc.profession || 'Medical Professional'}
+      onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })}
+    />
+  );
+})}
         </MapView>
       )}
       {mapLoading && (
