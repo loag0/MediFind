@@ -201,8 +201,7 @@ const styles = StyleSheet.create({
   paddingVertical: 5,
   marginTop: 20,
   marginBottom: 10,
-},
-
+  },
   professionText: {
     height: 40,
     padding: 10,

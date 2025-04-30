@@ -110,6 +110,7 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  margin: 20px;
 }
   
 .add-doctor-form button:hover {

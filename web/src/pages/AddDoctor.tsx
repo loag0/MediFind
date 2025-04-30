@@ -22,8 +22,7 @@ export default function AddDoctor() {
     fax: '',
     location: null as { lat: number; lng: number } | null,
     city: '',
-    bio: '',
-    rating: 0,  
+    bio: '',  
     profileImageUrl: '',
     workingHours: {
       start: '',
@@ -83,7 +82,6 @@ export default function AddDoctor() {
         ...form,
         createdAt: serverTimestamp(),
         profileImageUrl: imageUrl,
-        rating: Number(form.rating),
         city: form.city,
         location: {
           lat: locationCoords.lat,
@@ -164,14 +162,11 @@ export default function AddDoctor() {
             <LocationPicker
               value={locationCoords}
               onChange={(coords) => {
-    setLocationCoords(coords);
-    setForm((prev) => ({ ...prev, location: coords }));
-  }}
-/>
-
-
+                setLocationCoords(coords);
+                setForm((prev) => ({ ...prev, location: coords }));
+              }}
+            />
             </div>
-
           </div>
 
           <label>Start Time</label>

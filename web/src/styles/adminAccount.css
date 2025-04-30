@@ -19,7 +19,7 @@
     border-radius: 4px;
 }
   
-.account-box button {
+.change-btn {
     padding: 10px 20px;
     font-weight: bold;
     border: none;
@@ -30,9 +30,22 @@
     margin-top: 20px;
     width: 40%;
 }
+.change-btn:hover{
+    background: rgb(61, 116, 255);
+    color: black;
+}
 .logout-btn {
-    margin-top: 1rem;
-    background-color: #e53935;
+    padding: 10px 20px;
+    font-weight: bold;
+    border: none;
+    background: red;
     color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 20px;
+    width: 40%;
+}
+.logout-btn:hover{
+    background: #ff2222;
 }
   

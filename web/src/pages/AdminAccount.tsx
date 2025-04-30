@@ -49,7 +49,7 @@ export default function AdminAccount() {
           value={newPass}
           onChange={e => setNewPass(e.target.value)}
         />
-        <button onClick={handleChangePassword}>Change Password</button>
+        <button className="change-btn" onClick={handleChangePassword}>Change Password</button>
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
         {message && <p>{message}</p>}
       </div>

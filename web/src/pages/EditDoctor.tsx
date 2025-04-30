@@ -24,9 +24,9 @@ export default function EditDoctor() {
     gender: '',
     phone: '',
     fax: '',
+    city: '',
     location: new GeoPoint(0, 0),
     bio: '',
-    rating: 0,
     profileImageUrl: '',
     workingHours: {
       start: '',
@@ -128,7 +128,6 @@ export default function EditDoctor() {
       const doctorData = {
         ...form,
         profileImageUrl: imageUrl,
-        rating: Number(form.rating),
         location: location
       };
   
@@ -229,6 +228,14 @@ export default function EditDoctor() {
           </select>
           <input type="text" name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
           <input type="text" name="fax" placeholder="Fax" value={form.fax} onChange={handleChange} />
+          <input
+            type="text"
+            name="city"
+            placeholder="City"
+            value={form.city || ""}
+            onChange={handleChange}
+            required
+            />
           <div className="map-container">
             <label>Location</label>
               <div className="mapContainer">
