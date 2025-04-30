@@ -18,6 +18,7 @@ export default function Dashboard() {
     phone?: string;
     fax?: string;
     bio?: string;
+    city?: string;
     location?: string | { _lat: number; _long: number };
     profileImageUrl?: string;
     isSuspended?: boolean;
@@ -66,6 +67,7 @@ export default function Dashboard() {
             phone: data.phone,
             fax: data.fax,
             bio: data.bio,
+            city: data.city || 'Unknown',
             location: data.location,
             profileImageUrl: data.profileImageUrl,
             isSuspended: data.isSuspended
@@ -131,10 +133,9 @@ export default function Dashboard() {
                     <div className="doctor-info">
                       <h2>{doc.fullName}</h2>
                       <p className="doctor-location">
-                        {typeof doc.location === 'object' && '_lat' in doc.location && '_long' in doc.location
-                          ? `${doc.location._lat}, ${doc.location._long}`
-                          : doc.location || "No location"}
+                        {doc.city ? `City: ${doc.city}` : "No city available"}
                       </p>
+
                       <p className="doctor-profession">{doc.profession}</p>
 
                       <div className="doctor-actions">

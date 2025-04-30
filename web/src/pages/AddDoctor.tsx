@@ -9,6 +9,23 @@ import LocationPicker from "../components/LocationPicker";
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/Medi-Find/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'MediFind';
 
+const getCityFromCoords = async (lat: number, lng: number) => {
+  const res = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyC76louGw2ta-A-XwXtpm_0PZz0cnMc3y0`
+  );
+  const data = await res.json();
+
+  if (data.status === 'OK') {
+    const cityComponent = data.results[0].address_components.find((comp: { types: string | string[]; }) =>
+      comp.types.includes('locality') || comp.types.includes('administrative_area_level_2')
+    );
+    return cityComponent?.long_name || 'Unknown';
+  } else {
+    console.error('Reverse geocode failed:', data.status);
+    return 'Unknown';
+  }
+};
+
 export default function AddDoctor() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -20,7 +37,7 @@ export default function AddDoctor() {
     gender: '',
     phone: '',
     fax: '',
-    location: null as L.LatLngLiteral | null,
+    location: null as { lat: number; lng: number } | null,
     bio: '',
     rating: 0,  
     profileImageUrl: '',
@@ -53,44 +70,58 @@ export default function AddDoctor() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
       let imageUrl = '';
       if (imageFile) {
         const formData = new FormData();
         formData.append('file', imageFile);
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
+  
         const res = await fetch(CLOUDINARY_UPLOAD_URL, {
           method: 'POST',
-          body: formData
+          body: formData,
         });
-
+  
         const data = await res.json();
-        if (!data.secure_url) throw new Error("Image upload failed");
-
+        if (!data.secure_url) throw new Error('Image upload failed');
+  
         imageUrl = data.secure_url;
       }
-
+  
+      if (!locationCoords) {
+        alert('Please select a location on the map');
+        return;
+      }
+  
+      // 🌍 Get city name from coordinates
+      const city = await getCityFromCoords(locationCoords.lat, locationCoords.lng);
+  
+      // 🧠 Save doctor with location and city
       await addDoc(collection(db, 'doctors'), {
         ...form,
         createdAt: serverTimestamp(),
         profileImageUrl: imageUrl,
         rating: Number(form.rating),
-        lat: locationCoords?.lat,
-        lng: locationCoords?.lng,
+        location: {
+          lat: locationCoords.lat,
+          lng: locationCoords.lng,
+        },
+        city,
       });
-
+  
       navigate('/dashboard');
     } catch (err: unknown) {
       if (err instanceof Error) {
-        console.error("Error uploading to Cloudinary or Firestore:", err.message);
+        console.error('Error uploading to Cloudinary or Firestore:', err.message);
       } else {
-        console.error("An unknown error occurred:", err);
+        console.error('An unknown error occurred:', err);
       }
       alert('Error adding doctor.');
     }
   };
+  
+  
 
   return (
     <div className="container">
@@ -143,7 +174,15 @@ export default function AddDoctor() {
           <div className="map-container">
           <label>Location</label>
             <div className="mapContainer">
-            <LocationPicker value={locationCoords} onChange={setLocationCoords} />
+            <LocationPicker
+              value={locationCoords}
+              onChange={(coords) => {
+    setLocationCoords(coords);
+    setForm((prev) => ({ ...prev, location: coords }));
+  }}
+/>
+
+
             </div>
 
           </div>
