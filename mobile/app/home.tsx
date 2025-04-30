@@ -196,11 +196,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   professionScroll: {
-    paddingHorizontal: 20,
-    height: 60,
-    marginTop: 20,
-    marginBottom: 10,
-  },
+  paddingHorizontal: 20,
+  maxHeight: 50,
+  paddingVertical: 5,
+  marginTop: 20,
+  marginBottom: 10,
+},
+
   professionText: {
     height: 40,
     padding: 10,

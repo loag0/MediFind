@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   professionScroll: {
     paddingHorizontal: 20,
-    height: 60,
+    maxHeight: 50,
     marginTop: 20,
     marginBottom: 10,
   },
