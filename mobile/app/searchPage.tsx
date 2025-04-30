@@ -44,6 +44,7 @@ const SearchPage = () => {
             location?: any; 
             profession?: string; 
             fullName?: string; 
+            city?: string;
             map?: { lat: number; lng: number }; 
             profileImageUrl?: string; 
             phone?: string; 
@@ -73,7 +74,8 @@ const SearchPage = () => {
       const matchesSearch =
         searchQuery === '' ||
         doc.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.profession?.toLowerCase().includes(searchQuery.toLowerCase());
+        doc.profession?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.city?.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSpec && matchesSearch;
     });
 
@@ -178,8 +180,7 @@ const SearchPage = () => {
 
               <View style={styles.divider} />
               <Text style={styles.detailText}>{doc.profession}</Text>
-              <Text style={styles.detailText}>Lat: {doc.location?._lat || 'N/A'}</Text>
-              <Text style={styles.detailText}>Lng: {doc.location?._long || 'N/A'}</Text>
+              <Text style={styles.detailText}>City: {doc.city || 'N/A'}</Text>
               <Text style={styles.detailText}>{doc.phone}</Text>
 
               <View style={styles.cardActions}>

@@ -9,23 +9,6 @@ import LocationPicker from "../components/LocationPicker";
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/Medi-Find/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'MediFind';
 
-const getCityFromCoords = async (lat: number, lng: number) => {
-  const res = await fetch(
-    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyC76louGw2ta-A-XwXtpm_0PZz0cnMc3y0`
-  );
-  const data = await res.json();
-
-  if (data.status === 'OK') {
-    const cityComponent = data.results[0].address_components.find((comp: { types: string | string[]; }) =>
-      comp.types.includes('locality') || comp.types.includes('administrative_area_level_2')
-    );
-    return cityComponent?.long_name || 'Unknown';
-  } else {
-    console.error('Reverse geocode failed:', data.status);
-    return 'Unknown';
-  }
-};
-
 export default function AddDoctor() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -38,6 +21,7 @@ export default function AddDoctor() {
     phone: '',
     fax: '',
     location: null as { lat: number; lng: number } | null,
+    city: '',
     bio: '',
     rating: 0,  
     profileImageUrl: '',
@@ -94,20 +78,17 @@ export default function AddDoctor() {
         return;
       }
   
-      // 🌍 Get city name from coordinates
-      const city = await getCityFromCoords(locationCoords.lat, locationCoords.lng);
-  
       // 🧠 Save doctor with location and city
       await addDoc(collection(db, 'doctors'), {
         ...form,
         createdAt: serverTimestamp(),
         profileImageUrl: imageUrl,
         rating: Number(form.rating),
+        city: form.city,
         location: {
           lat: locationCoords.lat,
           lng: locationCoords.lng,
         },
-        city,
       });
   
       navigate('/dashboard');
@@ -121,8 +102,6 @@ export default function AddDoctor() {
     }
   };
   
-  
-
   return (
     <div className="container">
       <NavBar />
@@ -171,6 +150,14 @@ export default function AddDoctor() {
 
           <input type="text" name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} />
           <input type="text" name="fax" placeholder="Fax" value={form.fax} onChange={handleChange} />
+          <input
+            type="text"
+            name="city"
+            placeholder="City"
+            value={form.city || ""}
+            onChange={handleChange}
+            required
+            />
           <div className="map-container">
           <label>Location</label>
             <div className="mapContainer">
