@@ -3,7 +3,17 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";  
 
-const firebaseConfig = {
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId?: string; // Optional, as it may not always be used
+}
+
+const firebaseConfig: FirebaseConfig = {
   apiKey: "AIzaSyCHSA570U5Uo7SRQ256Us-2PxCDdwgXWFM",
   authDomain: "medifind-c1973.firebaseapp.com",
   projectId: "medifind-c1973",

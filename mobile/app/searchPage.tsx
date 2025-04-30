@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/firebase.js';
+import { db } from '../firebase/firebase';
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 
