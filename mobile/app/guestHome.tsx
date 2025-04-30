@@ -16,6 +16,7 @@ const Home = () => {
     profession: string;
     fullName: string;
     profileImageUrl?: string;
+    city?: string;
     location?: string;
     phone?: string;
   }
@@ -73,49 +74,41 @@ const Home = () => {
         ))}
       </ScrollView>
 
-      <ScrollView contentContainerStyle={styles.cardsWrapper}>
-        {loadingDoctors ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#11cc77" />
-            <Text style={styles.loadingText}>Loading doctors...</Text>
-          </View>
-        ) : filteredDoctors.length === 0 ? (
-          <Text style={styles.noDocText}>
-            No doctors available right now.
-          </Text>
-        ) : (
-          filteredDoctors.map(doc => (
-            <View key={doc.id} style={styles.card}>
-              <View style={styles.cardTop}>
-                <Image
-                  source={{ uri: doc.profileImageUrl || './assets/images/placeholder-profile.png' }}
-                  style={styles.cardImage}
-                />
-                <Text style={styles.cardName}>Dr. {doc.fullName}</Text>
+      <ScrollView style={styles.content}>
+              <View style={styles.cardsWrapper}>
+                {loadingDoctors ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#11cc77" />
+                    <Text style={styles.loadingText}>Loading doctors...</Text>
+                  </View>
+                ) : filteredDoctors.length === 0 ? (
+                  <Text style={styles.noDocText}>No doctors available right now.</Text>
+                ) : filteredDoctors.map(doc => (
+                  <View key={doc.id} style={styles.card}>
+                    <View style={styles.cardTop}>
+                      <Image
+                        source={{ uri: doc.profileImageUrl || './assets/images/placeholder-profile.png' }}
+                        style={styles.cardImage}
+                      />
+                      <Text style={styles.cardName}>Dr. {doc.fullName}</Text>
+                    </View>
+      
+                    <View style={styles.divider} />
+                    <Text style={styles.detailText}>{doc.profession}</Text>
+                    <Text style={styles.detailText}>{doc.city || 'Unknown'}</Text>
+                    <Text style={styles.detailText}>{doc.phone}</Text>
+      
+                    <View style={styles.cardActions}>
+                      <TouchableOpacity onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })} style={styles.actionBtn}>
+                        <FontAwesome name="eye" size={16} color="white" />
+                        <Text style={styles.btnText}>View</Text>
+                      </TouchableOpacity>
+      
+                    </View>
+                  </View>
+                ))}
               </View>
-
-              <View style={styles.divider} />
-
-              <View style={styles.cardDetails}>
-                <Text style={styles.detailText}>{doc.profession}</Text>
-                <Text style={styles.detailText}>{doc.phone}</Text>
-              </View>
-
-              <View style={styles.cardActions}>
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })
-                  }
-                  style={styles.actionBtn}
-                >
-                  <FontAwesome name="eye" size={16} color="white" />
-                  <Text style={styles.btnText}>View</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))
-        )}
-      </ScrollView>
+            </ScrollView>
     </View>
   );
 };
@@ -125,6 +118,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#111111',
     flex: 1,
   },
+  content: { flex: 1, left: 0, right: 0, zIndex: 1},
+  
   header: {
     top: 0,
     height: 100,
@@ -158,9 +153,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   professionScroll: {
-    marginTop: 20,
     paddingHorizontal: 20,
-    maxHeight: 50,
+    height: 60,
+    marginTop: 20,
+    marginBottom: 10,
   },
   professionText: {
     height: 40,
@@ -174,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   cardsWrapper: {
-    padding: 20,
+    paddingHorizontal: 20,
     gap: 20,
     minHeight: 300,
   },

@@ -180,7 +180,7 @@ const SearchPage = () => {
 
               <View style={styles.divider} />
               <Text style={styles.detailText}>{doc.profession}</Text>
-              <Text style={styles.detailText}>City: {doc.city || 'N/A'}</Text>
+              <Text style={styles.detailText}>{doc.city || 'Unknown'}</Text>
               <Text style={styles.detailText}>{doc.phone}</Text>
 
               <View style={styles.cardActions}>
