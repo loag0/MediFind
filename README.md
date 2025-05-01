@@ -10,7 +10,10 @@
 
   <br/><br/>
   <!-- Replace the image below with a real screenshot or hosted banner -->
-  <img src="https://github.com/loag0/medifind/home.png" width="700" alt="MediFind app preview"/>
+  <img src="/previews/home.jpg" width="100" alt="MediFind home page preview"/>
+  <img src="/previews/search_page.jpg" width="100" alt="MediFind search page preview"/>
+  <img src="/previews/user_profile.jpg" width="100" alt="MediFind user profile preview"/>
+  <img src="/previews/guest_page.jpg" width="100" alt="MediFind app preview"/>
 
   <br/>
   <a href="#📱-mobile-app">📱 Mobile App</a> •
