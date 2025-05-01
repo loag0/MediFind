@@ -15,6 +15,8 @@ export default function Index() {
       />
 
       <Text style={styles.welcometext}>Find the help you need</Text>
+      
+      <Text style={styles.creditText}>Loago Moremi - 22000066</Text>
 
       <View style={styles.bottomBox}>
         <TouchableOpacity
@@ -61,6 +63,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     textAlign: 'center',
+  },
+  creditText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 80,
+    textDecorationStyle: 'solid',
+    textDecorationLine: 'underline',
+    fontFamily: 'Roboto-bold',
   },
   bottomBox: {
     position: 'absolute',

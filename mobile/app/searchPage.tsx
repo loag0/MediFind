@@ -114,35 +114,20 @@ const SearchPage = () => {
           onRegionChangeComplete={() => setMapLoading(false)}
         >
           {filteredDoctors.map(doc => {
-  // Debug what's actually in the location object
-  console.log('Doctor location data:', doc.fullName, doc.location);
   
-  // Skip if no location data
-  if (!doc.location) {
-    console.log('Missing location for doctor:', doc.fullName);
-    return null;
-  }
+        const lat = doc.location.latitude || doc.location.lat;
+        const lng = doc.location.longitude || doc.location.lng;
   
-  // Extract coordinates from the location map
-  const lat = doc.location.latitude;
-  const lng = doc.location.longitude;
-  
-  // Skip if invalid coordinates
-  if (lat === undefined || lng === undefined || isNaN(lat) || isNaN(lng)) {
-    console.log('Invalid location for doctor:', doc.fullName);
-    return null;
-  }
-  
-  return (
-    <Marker
-      key={doc.id}
-      coordinate={{ latitude: 24.6581, longitude: 25.9122 }}
-      title={doc.fullName || 'Doctor'}
-      description={doc.profession || 'Medical Professional'}
-      onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })}
-    />
-  );
-})}
+        return (
+          <Marker
+            key={doc.id}
+            coordinate={{ latitude: lat, longitude: lng }}
+            title={doc.fullName || 'Doctor'}
+            description={doc.profession || 'Medical Professional'}
+            onPress={() => router.push({ pathname: '/doctor/[id]', params: { id: doc.id } })}
+          />
+        );
+      })}
         </MapView>
       )}
       {mapLoading && (
@@ -211,7 +196,6 @@ const SearchPage = () => {
                   <FontAwesome name="eye" size={16} color="white" />
                   <Text style={styles.btnText}>View</Text>
                 </TouchableOpacity>
-
               </View>
             </View>
           ))}

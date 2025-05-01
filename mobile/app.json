@@ -31,7 +31,7 @@
         }
       },
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/splash.png",
+        "foregroundImage": "./assets/images/app_icon.png",
         "backgroundColor": "#1c1c1c"
       },
       "package": "com.username0.medifind",
