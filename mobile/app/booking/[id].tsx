@@ -71,7 +71,7 @@ export default function Booking() {
     }
 
     const subject = 'Appointment Request';
-    const body = `Hi Dr. ${doctor.fullName},\n\nI'd like to book an appointment on ${formattedDate}.\n\nName: ${userData.name}\nPhone: ${userData.phone}\nEmail: ${userData.email}\nPurpose: ${purpose}`;
+    const body = `Hi Dr. ${doctor.fullName},\n\nI'd like to book an appointment for ${formattedDate}.\n\nName: ${userData.name}\nPhone: ${userData.phone}\nEmail: ${userData.email}\nPurpose: ${purpose}`;
     const mailto = `mailto:${doctor.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     try {
@@ -102,23 +102,29 @@ export default function Booking() {
   };
 
   const onChange = (event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || date;
-    
-    if (Platform.OS === 'android') {
+    if (event.type !== 'set' || !selectedDate) {
       setShowPicker(false);
-      if (event.type === 'set') {
-        if (mode === 'date') {
-          setTempDate(currentDate);
-          setMode('time');
-          setShowPicker(true);
-        } else {
-          setDate(currentDate);
-        }
-      }
+      return;
+    }
+  
+    if (mode === 'date') {
+      setTempDate(selectedDate); // store selected date
+      setMode('time');
+      setShowPicker(true);
     } else {
-      setDate(currentDate);
+      const combinedDateTime = new Date(
+        tempDate.getFullYear(),
+        tempDate.getMonth(),
+        tempDate.getDate(),
+        selectedDate.getHours(),
+        selectedDate.getMinutes()
+      );
+      setDate(combinedDateTime);
+      setShowPicker(false);
+      setMode('date');
     }
   };
+  
 
   const showDatepicker = () => {
     setMode('date');
