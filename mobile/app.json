@@ -10,20 +10,23 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-    "image": "./assets/images/splash.png",
-    "resizeMode": "contain",
-    "backgroundColor": "#111111" 
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#111111"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.username0.medifind",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
     },
     "android": {
-      "config":{
-        "googleMaps":{
+      "config": {
+        "googleMaps": {
           "apiKey": "AIzaSyC76louGw2ta-A-XwXtpm_0PZz0cnMc3y0"
         }
       },
@@ -31,7 +34,8 @@
         "foregroundImage": "./assets/images/splash.png",
         "backgroundColor": "#1c1c1c"
       },
-      "package": "com.username0.medifind"
+      "package": "com.username0.medifind",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -61,6 +65,9 @@
         "projectId": "f440126c-9a97-4eed-8cdc-755c1d7158f0",
         "buildType": "apk"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f440126c-9a97-4eed-8cdc-755c1d7158f0"
     }
   }
 }
