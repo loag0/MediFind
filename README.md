@@ -33,8 +33,6 @@
 - **Mobile App** (Expo) for patients to discover & book docs  
 - **Web Dashboard** for admins to manage providers & generate reports  
 
-Data syncs in real-time via Firebase so everything’s always fresh.
-
 ---
 
 ## 🔧 Tech Stack
