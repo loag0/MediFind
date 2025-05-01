@@ -1,21 +1,8 @@
 # 🩺 MediFind – Web Admin Portal
 
-Welcome to the **MediFind Admin Dashboard**, the control center of your medical directory app. Here, the admin can log in, manage doctors, upload profile pictures, suspend accounts, and generate clean printable reports.
+Welcome to the **MediFind Admin Dashboard**. Here, the admin can log in, manage doctors, upload profile pictures, suspend accounts, and generate clean printable reports.
 
-This is **not** for users. This is the **backend admin panel**. All the data flows from here to the mobile app.
-
----
-
-## 🧠 Features
-
-- 🔐 Email/password admin login (Firebase Auth)
-- 🧑‍⚕️ Add / Edit / Delete doctor profiles
-- ⛔ Suspend / Unsuspend doctors
-- 🕒 Set working hours separately from suspension
-- 🖼️ Upload profile pics (via Cloudinary)
-- 📄 Generate clean printable reports
-- 🚫 Suspended doctors don't show up on mobile
-- ⚛️ Built with React, Vite, Firebase, and Cloudinary
+📌 This is **not** for users. This is the **backend admin panel**. All the data flows from here to the mobile app.
 
 ---
 
@@ -26,6 +13,7 @@ This is **not** for users. This is the **backend admin panel**. All the data flo
 - 📁 **CSS Modules** (separate `.css` files, no Tailwind)
 - 🔥 **Firebase** (Auth + Firestore)
 - 🌩️ **Cloudinary** for doctor profile pictures
+- 📃 **html2pdf.js** for pdf generation
 
 ---
 
@@ -67,18 +55,31 @@ Go to your Cloudinary Dashboard and:
 
 ``` ts
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload';
-const CLOUDINARY_UPLOAD_PRESET = 'medifind_unsigned';
+const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UNSIGNED_PRESET';
 ```
 ### Start the dev server
 ```bash
 npm run dev
 ```
 
-## 🧑‍💻Admin Auth & Roles
-- Admin logs in with email + password (Firebase Auth)
--Manually create admin in Firebase Authentication console
--Each user in Firestore has a `role` field (either `"admin"` or `"user"`)
--When someone signs up from the mobile app, their role is auto-set to `"user"`
+---
+## 🧠 Features
+
+- 🔐 Email/password admin login (Firebase Auth)
+- 🧑‍⚕️ Add / Edit / Delete doctor profiles
+- ⛔ Suspend / Unsuspend doctors
+- 🕒 Set working hours
+- 🖼️ Upload profile pics (via Cloudinary)
+- 📄 Generate PDF reports (no printing)
+- 🚫 Suspended doctors don't show up on mobile
+- ⚛️ Built with React, Vite, Firebase, and Cloudinary
+- 📍 Pick location (via Leaflet map)
+- 🏙️ Manually enter city (for mobile filtering)
+- 🧾 Google Maps link for doctor coordinates
+
+## 🖨️ Reports → PDF Download
+- Clicking Download Report generates a styled PDF (using `html2pdf.js`)
+- Includes name, city, contact, bio, availability
 
 ## 🗒️Firestore Doctor Fields
 To keep things consistent across mobile and web, here are the fields every doctor doc should have:
@@ -98,21 +99,26 @@ To keep things consistent across mobile and web, here are the fields every docto
   "workingHours": {
     "start": "08:00",
     "end": "16:00"
+  },
+  "location": {
+    "lat": -24.069,
+    "lng": 25.420
   }
 }
 ```
 ---
-
-## 🖨️ Print-Friendly Reports
-Each doctor has a printable report page. When you click "Generate Report", you’ll be taken to a report view.
-
-✅ Click the "Print Report" button and only the report content gets printed — no nav, no fluff.
+## 🧑‍💻Admin Auth & Roles
+- Admins are manually created in Firebase Auth
+- Admin logs in with email + password (Firebase Auth)
+-Each user in Firestore has a `role` field (either `"admin"` or `"user"`)
+-When someone signs up from the mobile app, their role is auto-set to `"user"`
 
 ## 🧪 Extras
 - Protected routes via role-based login
 - Nav bar with logo + "Add Doctor" + user settings
+- Fully responsive dashboard
 - Image editing/removal works even after initial upload
-- Dynamic form layout (image controls shift layout down)
+- Dynamic form layout
 - Suspended doctor cards have a grey overlay with “SUSPENDED”
 
 ## 🤝 License
