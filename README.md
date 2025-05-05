@@ -10,7 +10,7 @@
     <img src="https://img.shields.io/badge/Tailwind-Styling-38bdf8?logo=tailwindcss" alt="Tailwind" />
   </p>
 
-  <h3>Mobile Previews</h3>
+  <h2>Mobile Previews</h2>
   <p>
   <img src="previews/home.jpg" width="240" style="margin: 10px;" alt="Home" />
   <img src="previews/search_page.jpg" width="240" style="margin-right: 10px;" alt="Search" />
@@ -19,6 +19,9 @@
 </p> 
 ---
 <h3>Web Previews</h3>
+<p>
+  
+</p>
 
   <p>
     <a href="#📱-mobile-app">📱 Mobile App</a> •
